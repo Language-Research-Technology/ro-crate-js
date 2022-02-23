@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: improve-docs
+          ref: graph-methods
 
       - name: Setup Node
         uses: actions/setup-node@v2
