@@ -4,7 +4,7 @@
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "node_modules/.bin/mocha",
     "build-docs": "node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "bin": {
@@ -36,6 +36,7 @@
     "clean-jsdoc-theme": "^3.3.2",
     "jsdoc": "^3.6.10",
     "lodash": "^4.17.21",
+    "mocha": "^9.2.1",
     "uuid": "^3.3.3"
   }
 }

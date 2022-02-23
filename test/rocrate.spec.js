@@ -64,11 +64,9 @@ describe("Context", function() {
 	  await crate.resolveContext();
 	  assert.equal(crate.resolveTerm("name"), "http://schema.org/name")
 	  assert.equal(crate.resolveTerm("@vocab"), "http://schema.org/")
-	  crate.getJson()["@context"][1]["new_term"] = "http://example.com/new_term"
-	  await crate.resolveContext();
+
+	  crate.addContext({"new_term": "http://example.com/new_term"});
 	  assert.equal(crate.resolveTerm("new_term"), "http://example.com/new_term")
-
-
 	});
 
 	it("can return locally defined properties and classes", async function () {
@@ -85,12 +83,8 @@ describe("Context", function() {
 		assert.equal(crate.getDefinition("new_term")["@id"], "http://example.com/new_term")
 		crate.addItem({"@id": "http://example.com/new_term", "sameAs": {"@id": "http://schema.org/name"}})
 		assert.equal(crate.getDefinition("new_term")["@id"], "http://schema.org/name")
-
-
-	
-		  });
-
-		});
+	});
+});
     
 
   // Schema.org no longer supports content negotiation
