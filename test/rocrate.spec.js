@@ -41,12 +41,12 @@ describe("Simple tests", function () {
 	// No Dataset
 	const dudCrate = newCrate();	
 	try {
-		dudCrate.index();
+		dudCrate.toGraph();
       } catch (e) {
         assert.strictEqual(e.message, 'There is no root dataset');
       }
 	const crate = new ROCrate();
-	crate.index();
+	crate.toGraph();
 	const rootDataset = crate.getRootDataset();
     assert(utils.hasType(rootDataset, "Dataset"));
     assert.equal(crate.utils.asArray(crate.getJson()["@context"])[0] , "https://w3id.org/ro/crate/1.1/context", "Has standard context (defined in ./lib/defaults.js)")
@@ -60,7 +60,7 @@ describe("Context", function() {
 	  this.timeout(5000); 
 	  // No Dataset
 	  const crate = new ROCrate();
-	  crate.index();
+	  crate.toGraph();
 	  await crate.resolveContext();
 	  assert.equal(crate.resolveTerm("name"), "http://schema.org/name")
 	  assert.equal(crate.resolveTerm("@vocab"), "http://schema.org/")
@@ -73,7 +73,7 @@ describe("Context", function() {
 		this.timeout(5000); 
 		const j = fs.readFileSync("test_data/heurist_crate/ro-crate-metadata.json");
 		const crate = new ROCrate(JSON.parse(j));
-		crate.index();
+		crate.toGraph();
 		
 		await crate.resolveContext();
 		assert.equal(crate.getDefinition("name")["@id"], "http://schema.org/name")
@@ -112,7 +112,7 @@ describe("Basic graph item operations", function() {
 
 	it("can fetch items by id", function () {
 		const crate = newCrate(_.clone(graph));
-		crate.index();
+		crate.toGraph();
 		const item = crate.getItem('https://foo/bar/oid1');
 		expect(item).to.have.property('@id', 'https://foo/bar/oid1');
 
@@ -120,7 +120,7 @@ describe("Basic graph item operations", function() {
 
 	it("can add an item", function() {
 		const crate = newCrate(_.clone(graph));
-		crate.index();
+		crate.toGraph();
 
 		const result = crate.addItem({
 			'@id': 'https://foo/bar/oid3', 'name': 'oid3', 'description': 'Test item 3'
@@ -134,7 +134,7 @@ describe("Basic graph item operations", function() {
 
 	it("can't add an item with an already existing id", function() {
 		const crate = newCrate(_.clone(graph));
-		crate.index();
+		crate.toGraph();
 
 		const result = crate.addItem({
 			'@id': 'https://foo/bar/oid1', 'name': 'oid1', 'description': 'Duplicate ID'
@@ -150,7 +150,7 @@ describe("IDs and identifiers", function() {
 
 	it("can generate unique ids", function() {
 		const crate = newCrate();	
-		crate.index();
+		crate.toGraph();
 		const N = 20;
 
 		_.times(N, () => {
@@ -165,7 +165,7 @@ describe("IDs and identifiers", function() {
 	it("Can resolve stuff", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 		crate.addBackLinks();
 		const root = crate.getRootDataset();
 		const results = crate.resolve(root, [{"property": "author"}]);
@@ -266,7 +266,7 @@ describe("IDs and identifiers", function() {
 				]
 		}
 		const crate = newCrate();
-		crate.index();
+		crate.toGraph();
 		expect(crate.getRootId()).to.equal("./");
 	});
 
@@ -294,7 +294,7 @@ describe("IDs and identifiers", function() {
 
 	it("can add an identifier when the existing identifier is a scalar", function() {
 		const crate = newCrate();
-		crate.index();
+		crate.toGraph();
 		const root = crate.getRootDataset();
 		root['identifier'] = 'a_scalar_identifier';
 		const myId = uuid();
@@ -314,7 +314,7 @@ describe("IDs and identifiers", function() {
 
 	it("can read an identifier from the root dataset", function() {
 		const crate = newCrate();
-		crate.index();
+		crate.toGraph();
 		const myId = uuid();
 		const namespace = "local-id";
 		const idCreated= crate.addIdentifier({
@@ -326,7 +326,7 @@ describe("IDs and identifiers", function() {
 
 		const crate2 = new ROCrate(jsonld);
 
-		crate2.index();
+		crate2.toGraph();
 		const myId2 = crate2.getNamedIdentifier(namespace);
 		expect(myId2).to.equal(myId);
 	});

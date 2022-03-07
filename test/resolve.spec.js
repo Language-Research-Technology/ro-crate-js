@@ -47,7 +47,7 @@ describe("Resolving linked items with multiple values", function() {
 	it("can resolve multiple links two hops from an item", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata-resolve.json"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 		crate.addBackLinks();
 		const root = crate.getRootDataset();
 
@@ -76,7 +76,7 @@ describe("Resolving linked items with multiple values", function() {
 	it("can resolve multiple reverse links", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata-resolve.json"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 		crate.addBackLinks();
 		const root = crate.getRootDataset();
 
@@ -117,7 +117,7 @@ describe("Conditional resolution with include", function() {
 	it("can resolve items of a particular type, via include", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata-conditional.jsonld"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 
 		const root = crate.getRootDataset();
 
@@ -145,7 +145,7 @@ describe("Conditional resolution with matchFn", function() {
 	it("can resolve items which match a regexp", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata-conditional.jsonld"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 
 		const root = crate.getRootDataset();
 
@@ -177,7 +177,7 @@ describe("Collect items when resolving links", function() {
 	it("generates a subgraph of all items traversed when resolving", async function () {
 		json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata-resolve.json"));
 		const crate = new ROCrate(json);
-		crate.index();
+		crate.toGraph();
 		crate.addBackLinks();
 		const root = crate.getRootDataset();
 
@@ -233,7 +233,7 @@ describe("Collect items when resolving links", function() {
 			]
 		});
 
-		crate.index();
+		crate.toGraph();
 
 
 		for( let i = 0; i < N_LEAVES; i++ ) {
