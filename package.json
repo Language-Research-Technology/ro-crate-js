@@ -31,12 +31,12 @@
   },
   "devDependencies": {
     "assert": "^2.0.0",
-    "chai": "^4.2.0",
+    "chai": "^4.3.6",
     "chai-fs": "^2.0.0",
     "clean-jsdoc-theme": "^3.3.2",
     "jsdoc": "^3.6.10",
     "lodash": "^4.17.21",
     "mocha": "^9.2.1",
-    "uuid": "^3.3.3"
+    "uuid": "^8.3.2"
   }
 }

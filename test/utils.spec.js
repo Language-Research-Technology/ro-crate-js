@@ -18,10 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
-const jsonUtils = require("../lib/utils");
+const utils = require("../lib/utils");
 
 describe("JSON-LD utils simple tests", function () {
-  const utils = new jsonUtils();
   it("Test basic indexing", function (done) {
     const testItem = {"@type": "Person"}
     assert(!utils.hasType(testItem, "Dataset"), "No false positive");

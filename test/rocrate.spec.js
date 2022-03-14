@@ -228,7 +228,7 @@ describe("IDs and identifiers", function() {
 		crate.toGraph();
 		const root = crate.getRootDataset();
 		const newItem = crate.getNormalizedTree(root, 2);
-		console.log(JSON.stringify(newItem, null, 2));
+		//console.log(JSON.stringify(newItem, null, 2));
 		expect(newItem.author[0].name[0]["@value"]).to.equal("Peter Sefton")
 
 		}
@@ -241,7 +241,7 @@ describe("IDs and identifiers", function() {
 		const root = crate.getRootDataset();
 		crate.pushValue(root, "name", 'This is my name')
 		const newItem = crate.getNormalizedTree(root, 1);
-		console.log(JSON.stringify(newItem, null, 2));
+		//console.log(JSON.stringify(newItem, null, 2));
 		expect(newItem.name[0]["@value"]).to.equal("This is my name")
 
 		}
@@ -347,7 +347,7 @@ describe("IDs and identifiers", function() {
 
 		const action = crate.getItem("Photo1");
 		assert.equal(action.instrument[1]["@id"], "#Panny20mm")
-		assert.equal(lens["@reverse"].instrument[0].name, action.name)
+		assert.equal(lens["@reverse"].instrument[0].name[0], action.name[0])
 
 		const newItem = {"@id": "#ABetterLens", "@type": "IndividualProduct", "name": "super lens"}
 		crate.addItem(newItem);
@@ -387,7 +387,7 @@ describe("IDs and identifiers", function() {
 		const getNewItem1BackAgain = crate.getItem("#BestLens");
 		assert.equal(getNewItem1BackAgain.name, "bestest lens");
 
-		console.log(action.instrument);
+		//console.log(action.instrument);
 
 
 
@@ -419,7 +419,7 @@ describe("IDs and identifiers", function() {
 		assert.equal(newItem.hasFile[5]["@id"],"files/429/original_301212cc7bd4fa7dd92c08f24f210069.csv" )
 		crate.changeGraphId(fileItem, "new-file-id.csv");
 		assert.equal(newItem.hasFile[5]["@id"],"new-file-id.csv" )
-		console.log(fileItem);
+		//console.log(fileItem);
 
 		//consol.og(crate.flatify(newItem, 2));
 		//console.log(crate.objectified);	
