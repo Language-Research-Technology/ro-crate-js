@@ -156,6 +156,24 @@ describe("Context", function () {
   });
 });
 
+describe("getTree", function () {
+  it("can generate a tree from any node", function () {
+    const crate = new ROCrate(testData);
+    const root = crate.getTree({root: 'https://orcid.org/0000'});
+    assert.equal(root.name[0]['@value'], "John Doe");
+    assert.equal(root.contactPoint[0].contactType[0]['@value'], "support");
+    assert.equal(root.contactPoint[0].availableLanguage[1].name[0]['@value'], "Spanish");
+  });
+  it("can generate a tree without circular dependencies", function () {
+    const crate = new ROCrate(testData);
+    crate.addValues('#lang-en', 'subjectOf', {'@id':'ro-crate-metadata.jsonld'});
+    const root = crate.getTree();
+    assert.equal(root.author[0].contactPoint[0].email[0]['@value'], root.contactPoint[0].email[0]['@value']);
+    const s = JSON.stringify(root);
+    assert.equal(root.contactPoint[0].availableLanguage[0].subjectOf[0].about[0]['@id'], './');
+  });
+});
+
 /*
 {
 author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]

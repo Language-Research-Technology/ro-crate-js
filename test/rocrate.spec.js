@@ -285,10 +285,13 @@ describe("IDs and identifiers", function() {
 		const rootDataset = crate.getRootDataset();
 		expect(rootDataset).to.have.property("identifier");
 		const rid = rootDataset['identifier'];
-		expect(rid).to.be.an('array').and.to.not.be.empty;
-		const match = rid.filter((i) => i['@id'] === idCreated);
-		expect(match).to.be.an('array').and.to.have.lengthOf(1);
+		console.log(rid);
 		expect(crate.getNamedIdentifier("local-id")).to.equal(myId);
+		assert.equal(rid['@id'], idCreated);
+		// expect(rid).to.be.an('array').and.to.not.be.empty;
+		// const match = rid.filter((i) => i['@id'] === idCreated);
+		// expect(match).to.be.an('array').and.to.have.lengthOf(1);
+		// expect(crate.getNamedIdentifier("local-id")).to.equal(myId);
 	});
 	
 
@@ -431,9 +434,9 @@ describe("IDs and identifiers", function() {
 	it ("can turn a flattened graph into a nested object", async function() {
 	  json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json"));
 	  const crate = new ROCrate(json);
-	  crate.objectify();
-	  assert(Array.isArray(crate.objectified.name))
-	  assert.equal(crate.objectified.name.length, 1)
+	  const root = crate.objectify();
+	  assert(Array.isArray(root.name))
+	  assert.equal(root.name.length, 1)
 	  //console.log(crate.objectified);
 	  
 	});
@@ -446,9 +449,9 @@ describe("IDs and identifiers", function() {
 		const root = crate.getRootDataset();
 		const author = crate.getItem(root.author["@id"]);
 		author.partOf = [{"@id": "./"}];
-		crate.objectify();
+		const root2 = crate.objectify();
 		//console.log(JSON.stringify(crate.objectified,null,2));
-		assert.equal(crate.objectified.author[0].name[0], "Peter Sefton")
+		assert.equal(root2.author[0].name[0], "Peter Sefton")
 	  });
 
 
