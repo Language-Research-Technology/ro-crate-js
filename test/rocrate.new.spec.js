@@ -73,6 +73,32 @@ describe("ROCrate get entity", function () {
   });
 });
 
+describe("Setters", function () {
+  it("can rename IDs", function () {
+    let crate = new ROCrate(testData);
+
+    const parent = crate.getEntity("https://orcid.org/0000");
+    const child = crate.getEntity("john.doe@uq.edu.au")
+    assert.equal(child['@id'], "john.doe@uq.edu.au")
+    assert.equal(child['@id'], parent.contactPoint['@id']);
+    crate.updateEntityId(child, "jane.doe@uq.edu.au");
+    assert.equal(child['@id'], "jane.doe@uq.edu.au")
+    assert.equal(child['@id'], parent.contactPoint['@id']);
+  });
+  it("can rename root ID", function () {
+    let crate = new ROCrate(testData);
+
+    assert.equal(crate.rootId, "./")
+    crate.updateEntityId(crate.rootId, "#root");
+    assert.equal(crate.rootId, "#root");
+    assert.equal(crate.rootDataset['@id'], "#root");
+    crate.rootId = "#root2"
+    assert.equal(crate.rootId, "#root2");
+    assert.equal(crate.rootDataset['@id'], "#root2");
+
+  })
+});
+
 describe("AddValues", function () {
 
   it("cannot add @id", function () {
@@ -118,7 +144,7 @@ describe("AddValues", function () {
     assert.strictEqual(e.keywords[2], "Test2");
   });
 
-  it("it can add a new entity to a property (nested objects)", function () {
+  it("can add a new entity to a property (nested objects)", function () {
     const crate = new ROCrate(testData);
     const root = crate.rootDataset;
     const newAuthor = {
@@ -159,14 +185,14 @@ describe("Context", function () {
 describe("getTree", function () {
   it("can generate a tree from any node", function () {
     const crate = new ROCrate(testData);
-    const root = crate.getTree({root: 'https://orcid.org/0000'});
+    const root = crate.getTree({ root: 'https://orcid.org/0000' });
     assert.equal(root.name[0]['@value'], "John Doe");
     assert.equal(root.contactPoint[0].contactType[0]['@value'], "support");
     assert.equal(root.contactPoint[0].availableLanguage[1].name[0]['@value'], "Spanish");
   });
   it("can generate a tree without circular dependencies", function () {
     const crate = new ROCrate(testData);
-    crate.addValues('#lang-en', 'subjectOf', {'@id':'ro-crate-metadata.jsonld'});
+    crate.addValues('#lang-en', 'subjectOf', { '@id': 'ro-crate-metadata.jsonld' });
     const root = crate.getTree();
     assert.equal(root.author[0].contactPoint[0].email[0]['@value'], root.contactPoint[0].email[0]['@value']);
     const s = JSON.stringify(root);
@@ -204,3 +230,5 @@ author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
 
 // check assigning an array of plain objects or entity proxy objects to a property
 // getnormalisedtree check circular
+
+// test changing root id
