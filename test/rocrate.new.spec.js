@@ -73,7 +73,18 @@ describe("ROCrate get entity", function () {
   });
 });
 
-describe("Setters", function () {
+describe("Mutators", function () {
+  it("can correctly update existing entity", function () {
+    let crate = new ROCrate(testData);
+    let e0 = {'@id': 'https://orcid.org/0000', name: 'test0' };
+    let e1 = {'@id': 'https://orcid.org/0001', name: 'test1' }
+    assert.equal(crate.getEntity('https://orcid.org/0000').name, "John Doe");
+    crate.updateEntity(e0);
+    assert.equal(crate.getEntity(e0['@id']).name, e0.name);
+    crate.updateEntity(e1);
+    assert.ok(!crate.getEntity(e1['@id']));
+  });
+
   it("can rename IDs", function () {
     let crate = new ROCrate(testData);
 
@@ -85,8 +96,10 @@ describe("Setters", function () {
     assert.equal(child['@id'], "jane.doe@uq.edu.au")
     assert.equal(child['@id'], parent.contactPoint['@id']);
   });
+
   it("can rename root ID", function () {
     let crate = new ROCrate(testData);
+    //let crate = new ROCrate(testData, { resolveLinks: true, alwaysAsArray: true });
 
     assert.equal(crate.rootId, "./")
     crate.updateEntityId(crate.rootId, "#root");
@@ -95,8 +108,19 @@ describe("Setters", function () {
     crate.rootId = "#root2"
     assert.equal(crate.rootId, "#root2");
     assert.equal(crate.rootDataset['@id'], "#root2");
+    crate.rootDataset['@id'] = "#root3"
+    assert.equal(crate.rootId, "#root3");
+    assert.equal(crate.rootDataset['@id'], "#root3");
+    assert.equal(crate.metadataFileEntity.about['@id'], "#root3");
+  });
 
-  })
+  it("can correctly assign existing entity", function () {
+    let crate = new ROCrate(testData);
+    crate.metadataFileEntity.about = crate.rootDataset;
+    data = crate.toJSON();
+    assert.equal(Object.keys(data['@graph'][0].about).length, 1);
+  });
+
 });
 
 describe("AddValues", function () {
@@ -152,14 +176,26 @@ describe("AddValues", function () {
       "name": "Petie",
       "affiliation": [
         { "@id": "#home", "name": "home" },
-        { "@id": "#home2", "name": "home2" }]
+        { "@id": "#home2", "name": "home2" }],
+      "contactPoint": {
+        "@id": "pete@uq.edu.au",
+        "@type": "ContactPoint",
+        "email": "pete@uq.edu.au",
+        "availableLanguage": [
+          { "@id": "#lang-en" },
+          { "@id": "#lang-fr", "@type": "Language", name: "French" }
+        ]
+      }
     };
-    crate.addValues(root, "author", newAuthor)
+    assert.equal(crate.graphLength, 9);
+    crate.addValues(root, "author", newAuthor);
+    assert.equal(crate.graphLength, 14);
     assert.equal(crate.getEntity("#pt").name, "Petie");
     assert.equal(crate.getEntity("#pt").affiliation[1]['@id'], "#home2");
     assert.equal(crate.getEntity("#home").name, "home");
     assert.equal(crate.getEntity("#home2").name, "home2");
-
+    assert.equal(crate.getEntity("#lang-fr").name, "French");
+    //console.log(crate.getGraph(true)[12]);
   });
 
   it("generate correct @reverse nodes", function () {
@@ -200,6 +236,27 @@ describe("getTree", function () {
   });
 });
 
+describe("toJSON", function () {
+  it("can return an array of plain flat entities", function () {
+    let crate = new ROCrate(testData);
+    const lang_fr = { '@id': '#lang-fr', "@type": "Language", name: "French" };
+    crate.addValues("john.doe@uq.edu.au", "availableLanguage", lang_fr);
+    let i = crate.getEntityIndex("john.doe@uq.edu.au");
+    let data = crate.toJSON();
+    assert.equal(Object.keys(data['@graph'][0].about).length, 1);
+    assert.equal(Object.keys(data['@graph'][i].availableLanguage[2]).length, 1);
+
+    // test with resolveLinks enabled
+    crate = new ROCrate(testData, { alwaysAsArray: true, resolveLinks: true });
+    crate.addValues("john.doe@uq.edu.au", "availableLanguage", lang_fr);
+    i = crate.getEntityIndex("john.doe@uq.edu.au");
+    data = crate.toJSON();
+    assert.equal(Object.keys(data['@graph'][0].about).length, 1);
+    assert.equal(Object.keys(data['@graph'][i].availableLanguage[2]).length, 1);
+    //console.log(JSON.stringify(data, null, 2));
+  });
+});
+
 /*
 {
 author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
@@ -231,4 +288,5 @@ author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
 // check assigning an array of plain objects or entity proxy objects to a property
 // getnormalisedtree check circular
 
-// test changing root id
+// pushing value to array of property
+// get disconnected entity
