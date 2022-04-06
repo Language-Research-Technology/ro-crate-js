@@ -120,6 +120,14 @@ describe("Mutators", function () {
     data = crate.toJSON();
     assert.equal(Object.keys(data['@graph'][0].about).length, 1);
   });
+  
+  it("can correctly add Identifier", function () {
+    let crate = new ROCrate(testData);
+    let identifier = {name:"test", identifier:"undefined"};
+    let entityId = `_:local-id:${identifier.name}:${identifier.identifier}`;
+    crate.addIdentifier(identifier);
+    assert.ok(crate.getEntity(entityId));
+  });
 
 });
 
