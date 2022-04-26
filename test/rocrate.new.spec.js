@@ -45,6 +45,11 @@ describe("ROCrate Create new graph", function () {
     let crate = new ROCrate(testData);
     assert.strictEqual(crate.getGraph().length, 9);
     //assert.deepStrictEqual(crate.json_ld, json);
+    // test with data in which the rooId is not "./"
+    var testData2 = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
+    crate = new ROCrate(testData2, {alwaysAsArray: true, resolveLinks: true});
+    assert.strictEqual(crate.rootId, testData2["@graph"][1].about["@id"]);
+    assert.strictEqual(crate.rootDataset.name[0], testData2["@graph"][0].name);
   });
 });
 
