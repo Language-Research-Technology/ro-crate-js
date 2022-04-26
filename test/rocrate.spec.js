@@ -235,6 +235,17 @@ describe("IDs and identifiers", function() {
 		
 	);
 
+	it("Can create a JSON-serializable tree object of a non root @id = './'  (for indexing and display)", async function () {
+			json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
+			const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+			const crate = new ROCrate(json, rocrateOpts);
+			const root = crate.getRootDataset();
+			const newItem = crate.getNormalizedTree(root, 2);
+			//console.log(JSON.stringify(newItem, null, 2));
+			expect(newItem.name[0]["@value"]).to.equal("Benefits Spinner Availability Mips");
+		}
+	);
+
 	it("Can create JSON-serializable tree objects from scratch (for indexing and display)", async function () {
 		const crate = new ROCrate();
 		crate.toGraph();
