@@ -247,6 +247,16 @@ describe("getTree", function () {
     const s = JSON.stringify(root);
     assert.equal(root.contactPoint[0].availableLanguage[0].subjectOf[0].about[0]['@id'], './');
   });
+	it("should ignore any id reference to a non-existant entity", async function () {
+    let json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const crate = new ROCrate(json, rocrateOpts);
+    const root = crate.rootDataset;
+    const newItem = crate.getTree({ root, depth: 2, allowCycle: true });
+    //console.log(JSON.stringify(newItem, null, 2));
+    assert.strictEqual(newItem.name[0]["@value"], json["@graph"][0].name);
+  }
+);
 });
 
 describe("toJSON", function () {
