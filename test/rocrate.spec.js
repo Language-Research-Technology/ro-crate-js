@@ -478,14 +478,14 @@ describe("IDs and identifiers", function() {
 
 	  });
 
-	it("Test a normal root with depth 2", function (done) {
+	it("Test a normal root with depth 0", function (done) {
 		const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json"));
 		const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
 		const crate = new ROCrate(json, rocrateOpts);
 		assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
 		const root = crate.getRootDataset();
-		const normalRoot = crate.getNormalizedTree(root, 2);
-		assert.equal(normalRoot.identifier[1]['@value'], '_:local-id:ATAP:arcp://name,farms-to-freeways/corpus/root', 'normal root 2 depth');
+		const normalRoot = crate.getNormalizedTree(root, 0);
+		assert.equal(normalRoot.identifier[1]['@id'], '_:local-id:ATAP:arcp://name,farms-to-freeways/corpus/root', 'normal root 2 depth');
 		done();
 	});
 
