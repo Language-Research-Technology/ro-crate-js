@@ -489,6 +489,16 @@ describe("IDs and identifiers", function() {
 		done();
 	});
 
+	it("Test nullify a property", function (done) {
+		const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json"));
+		const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+		const crate = new ROCrate(json, rocrateOpts);
+		assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
+		const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
+		rootDataset.license = null;
+		assert.equal(rootDataset.license, null);
+		done();
+	});
 });
 
 
