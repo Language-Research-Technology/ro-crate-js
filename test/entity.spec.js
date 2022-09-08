@@ -1,3 +1,4 @@
+"use strict";
 const Entity = require("../lib/entity");
 const assert = require("assert");
 const util = require('util');
@@ -106,11 +107,18 @@ describe("Entity wrapper", function () {
 		assert.ok(e.$$hasType("Dataset"));
 	});
 
+  it("can detect override of internal methods", function () {
+		let d = entities['#1'];
+    let e = new Entity(g, d);
+    assert.throws(()=>{e.toJSON = false});
+		//assert.ok(e.$$hasType("Dataset"));
+	});
+
   it("can return the underlying entity as flat jsonld object", function () {
 		let d = entities['#1'];
     let e = new Entity(g, d);
     //console.log(util.inspect(e, {showProxy: true}));
-		assert.strictEqual(e.$$toJSON(), d);
+		assert.strictEqual(e.toJSON(), d);
 	});
 
   it("can return right content when used in JSON.stringify", function () {

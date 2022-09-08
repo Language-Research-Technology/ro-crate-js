@@ -69,9 +69,9 @@ describe("Incremental checking", function () {
             name: "Some Person",
             "@type": "Person",
         };
-        dataset.author.push({ "@id": "http://orcid.org/some-other-orcid" });
+        dataset.author = [{ "@id": "http://orcid.org/some-orcid" }, { "@id": "http://orcid.org/some-other-orcid" }];
+        json["@graph"].push(author1, author2);
         var checker = new Checker(new ROCrate(json));
-        json["@graph"].push(author1);
         assert(
             !checker.hasAuthor().status,
             "Does not have one or more authors with @type Person or Organization"
@@ -103,7 +103,8 @@ describe("Incremental checking", function () {
         };
         dataset.license = { "@id": license["@id"]};
         json["@graph"].push(license);
-        var checker = new Checker(new ROCrate(json));
+        crate = new ROCrate(json);
+        var checker = new Checker(crate);
         assert(
             checker.hasLicense().status,
             "Has a license with @type CreativeWork"
@@ -121,19 +122,19 @@ describe("Incremental checking", function () {
             !checker.hasDatePublished().status,
             "Does not have a datePublished"
         );
-        dataset.datePublished = "2017"; // Not enough detail!
+        crate.rootDataset.datePublished = "2017"; // Not enough detail!
         assert(
             !checker.hasDatePublished().status,
             "Does not have a datePublished (not enough detail)"
         );
 
-        dataset.datePublished = ["2017-07-21", "2019-08-09"]; // this should do it
+        crate.rootDataset.datePublished = ["2017-07-21", "2019-08-09"]; // this should do it
         assert(
             !checker.hasDatePublished().status,
             "Does not have a single datePublished"
         );
 
-        dataset.datePublished = ["2017-07-21"]; // this should do it
+        crate.rootDataset.datePublished = ["2017-07-21"]; // this should do it
         assert(checker.hasDatePublished().status, "Does have a datePublished");
 
         //contactPoint missing
