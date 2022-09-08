@@ -47,7 +47,7 @@ describe("ROCrate Create new graph", function () {
     //assert.deepStrictEqual(crate.json_ld, json);
     // test with data in which the rooId is not "./"
     var testData2 = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
-    crate = new ROCrate(testData2, {alwaysAsArray: true, resolveLinks: true});
+    crate = new ROCrate(testData2, { alwaysAsArray: true, resolveLinks: true });
     assert.strictEqual(crate.rootId, testData2["@graph"][1].about["@id"]);
     assert.strictEqual(crate.rootDataset.name[0], testData2["@graph"][0].name);
   });
@@ -81,8 +81,8 @@ describe("ROCrate get entity", function () {
 describe("Mutators", function () {
   it("can correctly update existing entity", function () {
     let crate = new ROCrate(testData);
-    let e0 = {'@id': 'https://orcid.org/0000', name: 'test0' };
-    let e1 = {'@id': 'https://orcid.org/0001', name: 'test1' }
+    let e0 = { '@id': 'https://orcid.org/0000', name: 'test0' };
+    let e1 = { '@id': 'https://orcid.org/0001', name: 'test1' }
     assert.equal(crate.getEntity('https://orcid.org/0000').name, "John Doe");
     crate.updateEntity(e0);
     assert.equal(crate.getEntity(e0['@id']).name, e0.name);
@@ -125,10 +125,10 @@ describe("Mutators", function () {
     data = crate.toJSON();
     assert.equal(Object.keys(data['@graph'][0].about).length, 1);
   });
-  
+
   it("can correctly add Identifier", function () {
     let crate = new ROCrate(testData);
-    let identifier = {name:"test", identifier:"undefined"};
+    let identifier = { name: "test", identifier: "undefined" };
     let entityId = `_:local-id:${identifier.name}:${identifier.identifier}`;
     crate.addIdentifier(identifier);
     assert.ok(crate.getEntity(entityId));
@@ -247,16 +247,16 @@ describe("getTree", function () {
     const s = JSON.stringify(root);
     assert.equal(root.contactPoint[0].availableLanguage[0].subjectOf[0].about[0]['@id'], './');
   });
-	it("should ignore any id reference to a non-existant entity", async function () {
+  it("should ignore any id reference to a non-existant entity", async function () {
     let json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
-    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
     const crate = new ROCrate(json, rocrateOpts);
     const root = crate.rootDataset;
     const newItem = crate.getTree({ root, depth: 2, allowCycle: true });
     //console.log(JSON.stringify(newItem, null, 2));
     assert.strictEqual(newItem.name[0]["@value"], json["@graph"][0].name);
   }
-);
+  );
 });
 
 describe("toJSON", function () {

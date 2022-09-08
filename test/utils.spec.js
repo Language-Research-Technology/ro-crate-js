@@ -22,13 +22,13 @@ const utils = require("../lib/utils");
 
 describe("JSON-LD utils simple tests", function () {
   it("Test basic indexing", function (done) {
-    const testItem = {"@type": "Person"}
+    const testItem = { "@type": "Person" }
     assert(!utils.hasType(testItem, "Dataset"), "No false positive");
     utils.addType(testItem, "Dataset")
     assert(utils.hasType(testItem, "Dataset"), "Has type Dataset");
     done();
   });
- 
+
 });
 
 
