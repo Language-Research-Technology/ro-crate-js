@@ -2,13 +2,12 @@
 
 
 const program = require('commander');
-const fs = require('fs-extra');
+const fs = require('fs/promises');
 const path = require('path');
 const ROCrate = require("./lib/rocrate");
 const Checker = require("./lib/checker");
-const _ = require("lodash");
 
-
+var crateDir;
 
 program
   .version("0.1.0")
@@ -24,7 +23,7 @@ const outPath = program.outputPath ? program.outputPath : crateDir;
 
 
 async function main() {
-  const crate = new ROCrate(JSON.parse(await fs.readFile(path.join(crateDir, "ro-crate-metadata.jsonld"))));
+  const crate = new ROCrate(JSON.parse(await fs.readFile(path.join(crateDir, "ro-crate-metadata.jsonld"), 'utf8')));
   const checker = new Checker(crate);
   console.log(await checker.validate());
 }
