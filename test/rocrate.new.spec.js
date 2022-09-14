@@ -224,6 +224,67 @@ describe("AddValues", function () {
 
 });
 
+describe("setProperty", function () {
+  it("can not allow @reverse", function () {
+    let crate = new ROCrate(testData);
+    assert.throws(()=>crate.setProperty("./", "@reverse", "test"));
+  });
+  it("can accept null or undefined", function () {
+    let crate = new ROCrate(testData);
+    crate.setProperty("./", "test", "test");
+    assert.strictEqual(crate.getProperty("./", "test"), "test");
+    crate.setProperty("./", "test", null);
+    crate.setProperty("./", "test2", undefined);
+    assert.strictEqual(crate.getProperty("./", "test"), null);
+    assert.strictEqual(crate.getProperty("./", "test2"), undefined);
+    assert.strictEqual(crate.getEntity("./").test, null);
+    assert.strictEqual(crate.getEntity("./").test2, undefined);
+    assert.strictEqual('test' in crate.getEntity("./").toJSON(), false);
+    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), false);
+  });
+  it("can accept empty string", function () {
+    let crate = new ROCrate(testData);
+    crate.setProperty("./", "test", "");
+    assert.strictEqual(crate.getProperty("./", "test"), "");
+    assert.strictEqual(crate.getEntity("./").test, "");
+    assert.strictEqual(crate.getEntity("./").toJSON().test, "");
+  });
+});
+
+describe("deleteProperty", function () {
+  it("can not delete @id and @reverse property", function () {
+    let crate = new ROCrate(testData);
+    assert.throws(()=>crate.deleteProperty("./", "@id"));
+    assert.throws(()=>crate.deleteProperty("./", "@reverse"));
+  });
+  it("can delete normal property", function () {
+    let crate = new ROCrate(testData);
+    assert.ok(crate.getProperty("./", "description"));
+    crate.deleteProperty("./", "description");
+    assert.strictEqual(crate.getProperty("./", "description"), undefined);
+    assert.strictEqual(crate.getEntity("./").description, undefined);
+    
+  });
+  it("can delete normal property of an entity", function () {
+    let crate = new ROCrate(testData);
+    let root = crate.rootDataset;
+    assert.ok(root.description);
+    delete root.description;
+    assert.strictEqual(root.description, undefined);
+    assert.strictEqual('description' in root, false);
+  });
+});
+describe("delete values", function () {
+  it("can delete one value", function () {
+  });
+  it("can delete some values", function () {
+  });
+  it("can delete all values", function () {
+  });
+  it("can delete refs", function () {
+    //todo: check @reverse when deleting a ref
+  });
+});
 describe("Context", function () {
   it("can return locally defined properties and classes", async function () {
 

@@ -11,19 +11,16 @@ insert_final_newline = true
 # Matches multiple files with brace expansion notation
 # Set default charset
 # 2 space indentation
-[*.{js,py}]
+[*.js]
 charset = utf-8
 indent_style = space
 indent_size = 2
+quote_type = single
+
 
 # Tab indentation (no size specified)
 [Makefile]
 indent_style = tab
-
-# Indentation override for all JS under controllers directory
-[lib/**.js]
-indent_style = space
-indent_size = 2
 
 # Matches the exact files either package.json or .travis.yml
 [{package.json,.travis.yml,*.dev.yml}]

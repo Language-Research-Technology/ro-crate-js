@@ -116,7 +116,7 @@ describe("Incremental checking", function () {
 
     assert(
       checker.hasLicense().status,
-      "Does have a license with @type CreativeWork and a name and descrition"
+      "Does have a license with @type CreativeWork and a name and description"
     );
 
     // datePublished
