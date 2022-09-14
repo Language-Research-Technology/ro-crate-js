@@ -83,9 +83,10 @@ describe("Mutators", function () {
     let crate = new ROCrate(testData);
     let e0 = { '@id': 'https://orcid.org/0000', name: 'test0' };
     let e1 = { '@id': 'https://orcid.org/0001', name: 'test1' }
-    assert.equal(crate.getEntity('https://orcid.org/0000').name, "John Doe");
+    assert.equal(crate.getEntity(e0['@id'])?.name, "John Doe");
     crate.updateEntity(e0);
-    assert.equal(crate.getEntity(e0['@id']).name, e0.name);
+    console.log(crate.getEntity(e0['@id'])?.toJSON());
+    assert.equal(crate.getEntity(e0['@id'])?.name, e0.name);
     crate.updateEntity(e1);
     assert.ok(!crate.getEntity(e1['@id']));
   });
@@ -215,6 +216,7 @@ describe("AddValues", function () {
     const crate = new ROCrate(testData);
     const root = crate.rootDataset;
     const e1 = crate.getEntity("https://orcid.org/0000");
+    console.log(e1['@reverse']);
     assert.equal(e1['@reverse'].author['@id'], "./");
     const e2 = crate.getEntity("#lang-es");
     assert.equal(e2['@reverse'].availableLanguage['@id'], "john.doe@uq.edu.au");
@@ -264,7 +266,7 @@ describe("toJSON", function () {
     let crate = new ROCrate(testData);
     const lang_fr = { '@id': '#lang-fr', "@type": "Language", name: "French" };
     crate.addValues("john.doe@uq.edu.au", "availableLanguage", lang_fr);
-    let i = crate.getEntityIndex("john.doe@uq.edu.au");
+    let i = crate.indexOf("john.doe@uq.edu.au");
     let data = crate.toJSON();
     assert.equal(Object.keys(data['@graph'][0].about).length, 1);
     assert.equal(Object.keys(data['@graph'][i].availableLanguage[2]).length, 1);
@@ -272,7 +274,7 @@ describe("toJSON", function () {
     // test with resolveLinks enabled
     crate = new ROCrate(testData, { alwaysAsArray: true, resolveLinks: true });
     crate.addValues("john.doe@uq.edu.au", "availableLanguage", lang_fr);
-    i = crate.getEntityIndex("john.doe@uq.edu.au");
+    i = crate.indexOf("john.doe@uq.edu.au");
     data = crate.toJSON();
     assert.equal(Object.keys(data['@graph'][0].about).length, 1);
     assert.equal(Object.keys(data['@graph'][i].availableLanguage[2]).length, 1);

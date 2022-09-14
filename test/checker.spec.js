@@ -29,6 +29,7 @@ describe("Incremental checking", function () {
     var checker = new Checker(crate);
     var json = crate.getJson(); // should be a minimal viable datacrate
     delete json["@context"];
+    //console.log(json);
     assert(!checker.hasContext().status, "Does not have a @context");
     // Now with context
     json["@context"] = defaults.context;
@@ -40,7 +41,8 @@ describe("Incremental checking", function () {
     assert(checker.hasRootDataset().status, "Does have a root dataset");
     // No name yet
     assert(!checker.hasName().status, "Does not have a name");
-    var dataset = crate.getRootDataset();
+    //var dataset = crate.getRootDataset();
+    var dataset = json["@graph"][0];
     dataset.name = "";
     var checker = new Checker(new ROCrate(json));
     assert(!checker.hasName().status, "Does not have a name");
