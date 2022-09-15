@@ -17,13 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 const fs = require("fs");
 const assert = require("assert");
-const _ = require('lodash');
 const expect = require("chai").expect;
 const ROCrate = require("../lib/rocrate");
 const utils = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
-const { create } = require("lodash");
 
 
 function newCrate(graph) {
@@ -110,7 +108,7 @@ describe("Basic graph item operations", function () {
   ];
 
   it("can fetch items by id", function () {
-    const crate = newCrate(_.clone(graph));
+    const crate = newCrate(graph);
     crate.index();
     const item = crate.getItem('https://foo/bar/oid1');
     expect(item).to.have.property('@id', 'https://foo/bar/oid1');
@@ -118,7 +116,7 @@ describe("Basic graph item operations", function () {
   });
 
   it("can add an item", function () {
-    const crate = newCrate(_.clone(graph));
+    const crate = newCrate(graph);
     crate.index();
 
     const result = crate.addItem({
@@ -132,7 +130,7 @@ describe("Basic graph item operations", function () {
   });
 
   it("can't add an item with an already existing id", function () {
-    const crate = newCrate(_.clone(graph));
+    const crate = newCrate(graph);
     crate.index();
 
     const result = crate.addItem({
@@ -151,8 +149,7 @@ describe("IDs and identifiers", function () {
     const crate = newCrate();
     crate.index();
     const N = 20;
-
-    _.times(N, () => {
+    [...Array(N)].map(() => {
       const id = crate.uniqueId('_:a');
       const success = crate.addItem({ '@id': id });
       expect(success).to.be.true;

@@ -201,7 +201,7 @@ describe("Collect items when resolving links", function () {
 
     const sg_ids = subgraph.map((i) => i['@id']).sort();
 
-    const expect_ids = _.concat(c_ids, cl_ids).sort();
+    const expect_ids = c_ids.concat(cl_ids).sort();
 
     expect(sg_ids).to.deep.equal(expect_ids);
 

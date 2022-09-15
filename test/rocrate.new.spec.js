@@ -17,13 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 const fs = require("fs");
 const assert = require("assert").strict;
-const _ = require('lodash');
 const expect = require("chai").expect;
 const ROCrate = require("../lib/rocrate");
 const utils = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
-const { create } = require("lodash");
 
 
 function newCrate(graph) {
