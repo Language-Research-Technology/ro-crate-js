@@ -76,18 +76,51 @@ describe("ROCrate get entity", function () {
   });
 });
 
-describe("Mutators", function () {
+describe("addEntity", function () {
+  it("can add empty entity", function () {
+    let crate = new ROCrate();
+    crate.addEntity({'@id': 'abc'});
+    let e = crate.getEntity('abc');
+    console.log(e?.toJSON());
+  });
+});
+
+describe("updateEntity", function () {
   it("can correctly update existing entity", function () {
     let crate = new ROCrate(testData);
     let e0 = { '@id': 'https://orcid.org/0000', name: 'test0' };
     let e1 = { '@id': 'https://orcid.org/0001', name: 'test1' }
     assert.equal(crate.getEntity(e0['@id'])?.name, "John Doe");
     crate.updateEntity(e0);
-    console.log(crate.getEntity(e0['@id'])?.toJSON());
+    //console.log(crate.getEntity(e0['@id'])?.toJSON());
     assert.equal(crate.getEntity(e0['@id'])?.name, e0.name);
     crate.updateEntity(e1);
     assert.ok(!crate.getEntity(e1['@id']));
   });
+
+  it("can update nested entity", function () {
+    assert.ok(false);
+  });
+
+  it("can detect changes", function () {
+    let crate = new ROCrate();
+    crate.addEntity({'@id': 'abc', name: 'test'});
+    let u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test'});
+    assert.ok(u);
+    u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
+    assert.ok(u);
+    u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
+    assert.ok(!u);
+    u = crate.updateEntity({'@id': 'abc', name: 'test'});
+    assert.ok(u);
+    u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
+    assert.ok(u);
+    u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
+    assert.ok(!u);
+  });
+});
+
+describe("Mutators", function () {
 
   it("can rename IDs", function () {
     let crate = new ROCrate(testData);
