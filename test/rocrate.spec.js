@@ -291,7 +291,7 @@ describe("IDs and identifiers", function () {
     const rootDataset = crate.getRootDataset();
     expect(rootDataset).to.have.property("identifier");
     const rid = rootDataset['identifier'];
-    console.log(rid);
+    //console.log(rid);
     expect(crate.getNamedIdentifier("local-id")).to.equal(myId);
     assert.equal(rid['@id'], idCreated);
     // expect(rid).to.be.an('array').and.to.not.be.empty;
@@ -340,11 +340,7 @@ describe("IDs and identifiers", function () {
     expect(myId2).to.equal(myId);
   });
 
-
-
-
-
-  it("can turn a crate into an actual linked (maybe circular javascript object) ", async function () {
+  it("can turn a crate into an actual linked graph", async function () {
     const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
     const crate = new ROCrate(json);
     crate.toGraph();
@@ -489,7 +485,8 @@ describe("IDs and identifiers", function () {
 		const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
 		const crate = new ROCrate(json, rocrateOpts);
 		assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
-		const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
+		// const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
+		const rootDataset = crate.rootDataset;
 		rootDataset.license = null;
 		assert.equal(rootDataset.license, null);
 		done();

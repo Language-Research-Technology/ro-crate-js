@@ -7,7 +7,7 @@ const utils = require('../lib/utils');
 function createEntity(data, owner) {
   var n = new Node({'@id':data['@id'], '@reverse':{}});
   for (const k in data) {
-    n[k] = structuredClone(data[k]);
+    n[k] = utils.clone(data[k]);
   }
   var p = Proxy.revocable(n, new Handler(owner));
   return p.proxy;
@@ -33,6 +33,10 @@ describe("Entity wrapper", function () {
     getEntity: function (id) {
       let e = entities[id];
       if (e) return createEntity(e, g);
+    },
+    getProperty: function (entity, prop) {
+      let vals = utils.asArray(entity[prop]).map(v => (v?.['@id'] && this.config.resolveLinks) ? this.getEntity(v["@id"]) || v : v);
+      return (vals.length > 1 || this.config.alwaysAsArray) ? vals : vals[0];
     },
     setProperty: function (entity, prop, value) {
       if (prop === '@id') {

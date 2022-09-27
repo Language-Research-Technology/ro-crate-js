@@ -25,17 +25,19 @@ const uuid = require('uuid').v4;
 
 
 function newCrate(graph) {
-  if (!graph) { graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate] };
+  if (!graph) { graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate]; };
   return new ROCrate({ '@context': defaults.context, '@graph': graph });
 }
 /** @type ROCrate */
-var testData = JSON.parse(fs.readFileSync("test_data/simple-test.json"));
+var testData = JSON.parse(fs.readFileSync('test_data/simple-test.json', 'utf8'));
 
 
 describe("ROCrate Create new graph", function () {
   it("can create a new empty graph using defaults", function () {
     let crate = new ROCrate();
-    //assert.deepStrictEqual(crate.json_ld['@context'], defaults.context);
+    let raw = crate.toJSON();
+    assert.ok(utils.asArray(raw['@context']).includes('https://w3id.org/ro/crate/1.1/context'));
+    //assert.strictEqual(raw["@graph"]);
     //assert.deepStrictEqual(crate.json_ld['@graph'], [defaults.datasetTemplate,defaults.metadataFileDescriptorTemplate]);
   });
 
@@ -44,10 +46,10 @@ describe("ROCrate Create new graph", function () {
     assert.strictEqual(crate.getGraph().length, 9);
     //assert.deepStrictEqual(crate.json_ld, json);
     // test with data in which the rooId is not "./"
-    var testData2 = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
-    crate = new ROCrate(testData2, { alwaysAsArray: true, resolveLinks: true });
+    var testData2 = JSON.parse(fs.readFileSync('test_data/ro-crate-metadata.json', 'utf8'));
+    crate = new ROCrate(testData2, { array: true, link: true });
     assert.strictEqual(crate.rootId, testData2["@graph"][1].about["@id"]);
-    assert.strictEqual(crate.rootDataset.name[0], testData2["@graph"][0].name);
+    assert.strictEqual(crate.rootDataset?.name[0], testData2["@graph"][0].name);
   });
 });
 
@@ -79,7 +81,7 @@ describe("ROCrate get entity", function () {
 describe("addEntity", function () {
   it("can add empty entity", function () {
     let crate = new ROCrate();
-    crate.addEntity({'@id': 'abc'});
+    crate.addEntity({ '@id': 'abc' });
     let e = crate.getEntity('abc');
     console.log(e?.toJSON());
   });
@@ -89,7 +91,7 @@ describe("updateEntity", function () {
   it("can correctly update existing entity", function () {
     let crate = new ROCrate(testData);
     let e0 = { '@id': 'https://orcid.org/0000', name: 'test0' };
-    let e1 = { '@id': 'https://orcid.org/0001', name: 'test1' }
+    let e1 = { '@id': 'https://orcid.org/0001', name: 'test1' };
     assert.equal(crate.getEntity(e0['@id'])?.name, "John Doe");
     crate.updateEntity(e0);
     //console.log(crate.getEntity(e0['@id'])?.toJSON());
@@ -99,25 +101,35 @@ describe("updateEntity", function () {
   });
 
   it("can update nested entity", function () {
-    assert.ok(false);
+    let crate = new ROCrate(testData);
+    let e = {
+      '@id': 'https://orcid.org/0000', name: 'test0', contactPoint: {
+        '@id': 'john.doe@uq.edu.au', contactType: 'general'
+      }
+    };
+    crate.updateEntity(e, true);
+    assert.strictEqual(crate.getEntity('https://orcid.org/0000').name, 'test0');
+    assert.strictEqual(crate.getEntity('john.doe@uq.edu.au').contactType, 'support');
+    crate.updateEntity(e, true, true);
+    assert.strictEqual(crate.getEntity('john.doe@uq.edu.au').contactType, 'general');
   });
 
-  it("can detect changes", function () {
-    let crate = new ROCrate();
-    crate.addEntity({'@id': 'abc', name: 'test'});
-    let u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test'});
-    assert.ok(u);
-    u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
-    assert.ok(u);
-    u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
-    assert.ok(!u);
-    u = crate.updateEntity({'@id': 'abc', name: 'test'});
-    assert.ok(u);
-    u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
-    assert.ok(u);
-    u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
-    assert.ok(!u);
-  });
+  //   it("can detect changes", function () {
+  //     let crate = new ROCrate();
+  //     crate.addEntity({'@id': 'abc', name: 'test'});
+  //     let u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test'});
+  //     assert.ok(u);
+  //     u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
+  //     assert.ok(u);
+  //     u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
+  //     assert.ok(!u);
+  //     u = crate.updateEntity({'@id': 'abc', name: 'test'});
+  //     assert.ok(u);
+  //     u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
+  //     assert.ok(u);
+  //     u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
+  //     assert.ok(!u);
+  //   });
 });
 
 describe("Mutators", function () {
@@ -126,11 +138,11 @@ describe("Mutators", function () {
     let crate = new ROCrate(testData);
 
     const parent = crate.getEntity("https://orcid.org/0000");
-    const child = crate.getEntity("john.doe@uq.edu.au")
-    assert.equal(child['@id'], "john.doe@uq.edu.au")
+    const child = crate.getEntity("john.doe@uq.edu.au");
+    assert.equal(child['@id'], "john.doe@uq.edu.au");
     assert.equal(child['@id'], parent.contactPoint['@id']);
     crate.updateEntityId(child, "jane.doe@uq.edu.au");
-    assert.equal(child['@id'], "jane.doe@uq.edu.au")
+    assert.equal(child['@id'], "jane.doe@uq.edu.au");
     assert.equal(child['@id'], parent.contactPoint['@id']);
   });
 
@@ -138,14 +150,14 @@ describe("Mutators", function () {
     let crate = new ROCrate(testData);
     //let crate = new ROCrate(testData, { resolveLinks: true, alwaysAsArray: true });
 
-    assert.equal(crate.rootId, "./")
+    assert.equal(crate.rootId, "./");
     crate.updateEntityId(crate.rootId, "#root");
     assert.equal(crate.rootId, "#root");
     assert.equal(crate.rootDataset['@id'], "#root");
-    crate.rootId = "#root2"
+    crate.rootId = "#root2";
     assert.equal(crate.rootId, "#root2");
     assert.equal(crate.rootDataset['@id'], "#root2");
-    crate.rootDataset['@id'] = "#root3"
+    crate.rootDataset['@id'] = "#root3";
     assert.equal(crate.rootId, "#root3");
     assert.equal(crate.rootDataset['@id'], "#root3");
     assert.equal(crate.metadataFileEntity.about['@id'], "#root3");
@@ -258,7 +270,7 @@ describe("AddValues", function () {
 describe("setProperty", function () {
   it("can not allow @reverse", function () {
     let crate = new ROCrate(testData);
-    assert.throws(()=>crate.setProperty("./", "@reverse", "test"));
+    assert.throws(() => crate.setProperty("./", "@reverse", "test"));
   });
   it("can accept null or undefined", function () {
     let crate = new ROCrate(testData);
@@ -270,8 +282,8 @@ describe("setProperty", function () {
     assert.strictEqual(crate.getProperty("./", "test2"), undefined);
     assert.strictEqual(crate.getEntity("./").test, null);
     assert.strictEqual(crate.getEntity("./").test2, undefined);
-    assert.strictEqual('test' in crate.getEntity("./").toJSON(), false);
-    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), false);
+    assert.strictEqual('test' in crate.getEntity("./").toJSON(), true);
+    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), true);
   });
   it("can accept empty string", function () {
     let crate = new ROCrate(testData);
@@ -280,13 +292,50 @@ describe("setProperty", function () {
     assert.strictEqual(crate.getEntity("./").test, "");
     assert.strictEqual(crate.getEntity("./").toJSON().test, "");
   });
+  it("can accept a value or a list", function () {
+    let crate = new ROCrate(testData);
+    var r = crate.rootDataset;
+    assert.ok(r);
+    r.test = 'a';
+    assert.strictEqual(r.test, 'a');
+    r.test = 'b';
+    assert.strictEqual(r.test, 'b');
+    r.test = ['a'];
+    assert.strictEqual(r.test[0], 'a');
+    r.test = ['a', 'b'];
+    assert.strictEqual(r.test[1], 'b');
+    r.test = ['c', 'd'];
+    assert.strictEqual(r.test[0], 'c');
+    r.test = [];
+    assert.strictEqual(r.test.length, 0);
+    r.test = '';
+    assert.strictEqual(r.test, '');
+    let v1 = { a: { aa: 1 }, b: { bb: 2 }, c: [1, 2] };
+    let v2 = { c: [1, 2, 3.4] };
+    r.test = [v1, v2];
+    assert.deepStrictEqual(r.test[0], v1);
+    assert.deepStrictEqual(r.test[1], v2);
+    v2.d = 1;
+    assert.equal(r.test[1].d, undefined);
+  });
+  it("can handle nested entities", function () {
+    let crate = new ROCrate(testData, { alwaysAsArray: true, resolveLinks: true });
+    var r = crate.rootDataset;
+    assert.ok(r);
+    r.test = { "@id": "https://orcid.org/0000" };
+    assert.strictEqual(r.test[0].name[0], 'John Doe');
+    r.test = [{ "@id": "https://orcid.org/0000" }, { "@id": "https://uq.edu.au/" }];
+    assert.strictEqual(r.test[1].name[0], 'University of Queensland');
+    r.test = [{ "@id": "https://uq.edu.au/" }];
+    assert.strictEqual(r.test[0].name[0], 'University of Queensland');
+  });
 });
 
 describe("deleteProperty", function () {
   it("can not delete @id and @reverse property", function () {
     let crate = new ROCrate(testData);
-    assert.throws(()=>crate.deleteProperty("./", "@id"));
-    assert.throws(()=>crate.deleteProperty("./", "@reverse"));
+    assert.throws(() => crate.deleteProperty("./", "@id"));
+    assert.throws(() => crate.deleteProperty("./", "@reverse"));
   });
   it("can delete normal property", function () {
     let crate = new ROCrate(testData);
@@ -294,7 +343,7 @@ describe("deleteProperty", function () {
     crate.deleteProperty("./", "description");
     assert.strictEqual(crate.getProperty("./", "description"), undefined);
     assert.strictEqual(crate.getEntity("./").description, undefined);
-    
+
   });
   it("can delete normal property of an entity", function () {
     let crate = new ROCrate(testData);
@@ -305,23 +354,47 @@ describe("deleteProperty", function () {
     assert.strictEqual('description' in root, false);
   });
 });
+
 describe("delete values", function () {
+  var crate = new ROCrate(), root
+  beforeEach(function(){
+    crate = new ROCrate();
+    root = crate.rootDataset;
+    assert.ok(root);
+  });
   it("can delete one value", function () {
+    root.test = ['a','b','c'];
+    crate.deleteValues(root, 'test', 'b');
+    assert.deepStrictEqual(root.test, ['a', 'c']);
   });
   it("can delete some values", function () {
+    root.test = ['a','b','c','d'];
+    crate.deleteValues(root, 'test', ['b', 'c']);
+    assert.deepStrictEqual(root.test, ['a', 'd']);
   });
   it("can delete all values", function () {
+    root.test = ['a','b','c'];
+    crate.deleteValues(root, 'test', ['a', 'b', 'c']);
+    assert.ok(!root.test);
   });
   it("can delete refs", function () {
-    //todo: check @reverse when deleting a ref
+    crate.addEntity({'@id': '#e1', n: 1});
+    crate.addEntity({'@id': '#e2', n: 2});
+    var e1 = crate.getEntity('#e1');
+    root.test = [{'@id': '#e1'}, {'@id': '#e2'}];
+    assert.strictEqual(e1?.['@reverse'].test['@id'], './');
+    crate.deleteValues(root, 'test', {'@id': '#e1'});
+    assert.strictEqual(root.test['@id'], '#e2');
+    //check @reverse when deleting a ref
+    assert.ok(!e1?.['@reverse'].test);
   });
 });
-describe("Context", function () {
-  it("can return locally defined properties and classes", async function () {
 
-    // const crate2 = new ROCrate(JSON.parse(j));
-    // var c = await crate2.resolveContext();
-    // assert.equal(c.getDefinition("name")["@id"], "http://schema.org/name");
+describe("get context", function () {
+  it("can return locally defined properties and classes", function () {
+    const crate = new ROCrate();
+    assert.equal(crate.context?.name, "http://schema.org/name");
+    assert.equal(crate.getDefinition("name")["@id"], "http://schema.org/name");
   });
 });
 
@@ -342,7 +415,7 @@ describe("getTree", function () {
     assert.equal(root.contactPoint[0].availableLanguage[0].subjectOf[0].about[0]['@id'], './');
   });
   it("should ignore any id reference to a non-existant entity", async function () {
-    let json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json"));
+    let json = JSON.parse(fs.readFileSync('test_data/ro-crate-metadata.json', 'utf8'));
     const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
     const crate = new ROCrate(json, rocrateOpts);
     const root = crate.rootDataset;

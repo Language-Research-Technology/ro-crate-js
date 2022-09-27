@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/mocha",
-    "build-docs": "node_modules/.bin/jsdoc -c jsdoc.json"
+    "build-docs": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "test-16": "docker run -v `pwd`:`pwd` -w `pwd` node:16-alpine npm test"
   },
   "bin": {
     "roccheck": "roc-checker.js"
