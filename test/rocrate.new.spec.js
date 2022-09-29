@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const fs = require("fs");
 const assert = require("assert").strict;
 const expect = require("chai").expect;
-const ROCrate = require("../lib/rocrate");
-const utils = require("../lib/utils");
+const {ROCrate} = require("../lib/rocrate");
+const {Utils} = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
 
@@ -36,7 +36,7 @@ describe("ROCrate Create new graph", function () {
   it("can create a new empty graph using defaults", function () {
     let crate = new ROCrate();
     let raw = crate.toJSON();
-    assert.ok(utils.asArray(raw['@context']).includes('https://w3id.org/ro/crate/1.1/context'));
+    assert.ok(Utils.asArray(raw['@context']).includes('https://w3id.org/ro/crate/1.1/context'));
     //assert.strictEqual(raw["@graph"]);
     //assert.deepStrictEqual(crate.json_ld['@graph'], [defaults.datasetTemplate,defaults.metadataFileDescriptorTemplate]);
   });

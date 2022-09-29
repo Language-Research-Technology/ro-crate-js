@@ -4,8 +4,8 @@
 const program = require('commander');
 const fs = require('fs/promises');
 const path = require('path');
-const ROCrate = require("./lib/rocrate");
-const Checker = require("./lib/checker");
+const {ROCrate} = require("./lib/rocrate");
+const {Checker} = require("./lib/checker");
 
 var crateDir;
 

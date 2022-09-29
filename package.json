@@ -4,21 +4,32 @@
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha",
-    "build-docs": "node_modules/.bin/jsdoc -c jsdoc.json",
-    "test-16": "docker run -v `pwd`:`pwd` -w `pwd` node:16-alpine npm test"
+    "test": "mocha",
+    "build-docs": "typedoc",
+    "test-node16": "docker run -v `pwd`:`pwd` -w `pwd` node:16-alpine npm test",
+    "test-node18": "docker run -v `pwd`:`pwd` -w `pwd` node:18-alpine npm test"
   },
   "bin": {
     "roccheck": "roc-checker.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/UTS-eResearch/ro-crate-js.git"
+    "url": "https://github.com/Arkisto-Platform/ro-crate-js.git"
   },
   "keywords": [
-    "RO-Crate"
+    "RO-Crate",
+    "rocrate",
+    "research object",
+    "research object crate",
+    "metadata",
+    "jsonld"
   ],
   "author": "UTS eResearch Team",
+  "contributors": [
+    "Alvin Sebastian (https://orcid.org/0000-0002-9086-1722)",
+    "Moises Sacal Bonequi (https://orcid.org/0000-0002-4438-2755)",
+    "Peter Sefton (https://orcid.org/0000-0002-3545-944X)"
+  ],
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "commander": "^4.0.1",
@@ -28,10 +39,9 @@
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "chai-fs": "^2.0.0",
-    "clean-jsdoc-theme": "^3.3.2",
-    "jsdoc": "^3.6.10",
     "lodash": "^4.17.21",
     "mocha": "^9.2.1",
+    "typedoc": "^0.23.15",
     "uuid": "^8.3.2"
   }
 }

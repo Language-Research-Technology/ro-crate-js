@@ -16,11 +16,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 const assert = require("assert");
-const Checker = require("../lib/checker");
+const {Checker} = require("../lib/checker");
 const chai = require("chai");
 chai.use(require("chai-fs"));
 const defaults = require("../lib/defaults");
-const ROCrate = require("../lib/rocrate");
+const {ROCrate} = require("../lib/rocrate");
 
 describe("Incremental checking", function () {
   it("should trigger all the right reporting", async function () {

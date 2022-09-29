@@ -19,9 +19,9 @@ const fs = require("fs");
 const assert = require("assert");
 const _ = require('lodash');
 const expect = require("chai").expect;
-const ROCrate = require("../lib/rocrate");
+const {ROCrate} = require("../lib/rocrate");
 const defaults = require("../lib/defaults");
-const jsonUtils = require("../lib/utils");
+const {Utils} = require("../lib/utils");
 const uuid = require('uuid').v4;
 
 const PERSONID = '#person___VICFP_18551934_14_8';

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": "..",
+    "module": "CommonJS",
+    "target": "es2022",
+    "outDir": "dist",
+  },
+  "include": [
+    "index.ts",
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "typedocOptions": {
+    "entryPoints": ["index.ts"],
+    "out": "./docs",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "includeVersion": true
+  }
+}

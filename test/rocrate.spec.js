@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const fs = require("fs");
 const assert = require("assert");
 const expect = require("chai").expect;
-const ROCrate = require("../lib/rocrate");
-const utils = require("../lib/utils");
+const {ROCrate} = require("../lib/rocrate");
+const {Utils} = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
 
@@ -45,7 +45,7 @@ describe("Simple tests", function () {
     const crate = new ROCrate();
     crate.index();
     const rootDataset = crate.getRootDataset();
-    assert(utils.hasType(rootDataset, "Dataset"));
+    assert(Utils.hasType(rootDataset, "Dataset"));
     assert.equal(crate.utils.asArray(crate.getJson()["@context"])[0], "https://w3id.org/ro/crate/1.1/context", "Has standard context (defined in ./lib/defaults.js)")
 
     done();

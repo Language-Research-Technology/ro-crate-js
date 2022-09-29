@@ -64,5 +64,5 @@ typings/
 .idea
 .vscode
 
-# JSDoc generated documentation
+# generated api documentation
 docs/

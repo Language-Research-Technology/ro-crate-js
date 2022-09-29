@@ -2,12 +2,12 @@
 const {Node, Handler} = require("../lib/node");
 const assert = require("assert");
 const util = require('util');
-const utils = require('../lib/utils');
+const {Utils} = require('../lib/utils');
 
 function createEntity(data, owner) {
   var n = new Node({'@id':data['@id'], '@reverse':{}});
   for (const k in data) {
-    n[k] = utils.clone(data[k]);
+    n[k] = Utils.clone(data[k]);
   }
   var p = Proxy.revocable(n, new Handler(owner));
   return p.proxy;
@@ -35,7 +35,7 @@ describe("Entity wrapper", function () {
       if (e) return createEntity(e, g);
     },
     getProperty: function (entity, prop) {
-      let vals = utils.asArray(entity[prop]).map(v => (v?.['@id'] && this.config.resolveLinks) ? this.getEntity(v["@id"]) || v : v);
+      let vals = Utils.asArray(entity[prop]).map(v => (v?.['@id'] && this.config.resolveLinks) ? this.getEntity(v["@id"]) || v : v);
       return (vals.length > 1 || this.config.alwaysAsArray) ? vals : vals[0];
     },
     setProperty: function (entity, prop, value) {
@@ -44,7 +44,7 @@ describe("Entity wrapper", function () {
         entity['@id'] = value;
         entities[value] = entity;
       } else {
-        let values = utils.asArray(value);
+        let values = Utils.asArray(value);
         for (let i = 0; i < values.length; ++i) {
           let v = values[i];
           if (v != null && v['@id'] && Object.keys(v).length > 1) {
