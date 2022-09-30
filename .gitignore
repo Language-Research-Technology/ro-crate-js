@@ -59,3 +59,10 @@ typings/
 
 # next.js build output
 .next
+
+# editors config
+.idea
+.vscode
+
+# generated api documentation
+docs/

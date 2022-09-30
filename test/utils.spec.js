@@ -18,18 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
-const jsonUtils = require("../lib/utils");
+const {Utils} = require("../lib/utils");
 
-describe("JSON-LD utils simple tests", function () {
-  const utils = new jsonUtils();
+describe("JSON-LD utils", function () {
   it("Test basic indexing", function (done) {
-    const testItem = {"@type": "Person"}
-    assert(!utils.hasType(testItem, "Dataset"), "No false positive");
-    utils.addType(testItem, "Dataset")
-    assert(utils.hasType(testItem, "Dataset"), "Has type Dataset");
+    const testItem = { "@type": "Person" }
+    assert(!Utils.hasType(testItem, "Dataset"), "No false positive");
+    Utils.addType(testItem, "Dataset")
+    assert(Utils.hasType(testItem, "Dataset"), "Has type Dataset");
     done();
   });
- 
+  it("can clone objects", function () {
+    const o1 = {}, o2 = {};
+    const a = [{a:1},{a:2}];
+    const o = { "@type": "Person", name: 'test', nested: [{a:1},{a:2}] };
+    const cloned = Utils.clone(o);
+    assert.deepStrictEqual(o, cloned);
+    o.name = 'abc';
+    assert.strictEqual(cloned.name, 'test');
+  });
+
 });
 
 

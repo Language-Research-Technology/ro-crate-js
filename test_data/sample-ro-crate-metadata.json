@@ -2545,7 +2545,7 @@
     {
       "@id": "http://dx.doi.org/10.1000/123456",
       "@type": "ScholarlyArticle",
-      "creator": {
+      "author": {
         "@id": "http://orcid.org/0000-0002-3545-944X"
       },
       "datePublished": "2018",
@@ -2628,7 +2628,7 @@
         "@id": "http://www.geonames.org/8152662/catalina-park.html"
       },
       "path": "./",
-      "creator": {
+      "author": {
         "@id": "http://orcid.org/0000-0002-3545-944X"
       },
       "datePublished": "2017-06-29",
@@ -2711,7 +2711,7 @@
       "@type": "ImageObject",
       "contentSize": "5114778",
       "path": "pics/2017-06-11 12.56.14.jpg",
-      "creator": {
+      "author": {
         "@id": "http://orcid.org/0000-0002-3545-944X"
       },
       "description": "Depicts a fence at a disused motor racing venue with the front part of a slightly out of focus black dog in the foreground.",
