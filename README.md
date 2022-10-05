@@ -7,7 +7,7 @@ This is a JavaScript library to create and manipulate [Research Object Crate](ht
 
 Install the library:
 
-    npm install rocrate
+    npm install ro-crate
 
 
 ## Usage

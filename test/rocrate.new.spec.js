@@ -353,6 +353,25 @@ describe("deleteProperty", function () {
     assert.strictEqual(root.description, undefined);
     assert.strictEqual('description' in root, false);
   });
+  it("can delete refs", function () {
+    let crate = new ROCrate(testData);
+    let root = crate.rootDataset;
+    assert.ok(root);
+    crate.addEntity({'@id': '#e1', n: 1});
+    crate.addEntity({'@id': '#e2', n: 2});
+    var e1 = crate.getEntity('#e1');
+    var e2 = crate.getEntity('#e2');
+    root.test1 = [{'@id': '#e1'}];
+    root.test2 = [{'@id': '#e2'}];
+    assert.strictEqual(e1?.['@reverse'].test1['@id'], './');
+    assert.strictEqual(e2?.['@reverse'].test2['@id'], './');
+    crate.deleteProperty(root, 'test1');
+    assert.ok(!root.test1);
+    assert.ok(!e1?.['@reverse'].test1);
+    delete root.test2;
+    assert.ok(!root.test2);
+    assert.ok(!e2?.['@reverse'].test2);
+  });
 });
 
 describe("delete values", function () {
@@ -381,20 +400,23 @@ describe("delete values", function () {
     crate.addEntity({'@id': '#e1', n: 1});
     crate.addEntity({'@id': '#e2', n: 2});
     var e1 = crate.getEntity('#e1');
+    var e2 = crate.getEntity('#e2');
     root.test = [{'@id': '#e1'}, {'@id': '#e2'}];
     assert.strictEqual(e1?.['@reverse'].test['@id'], './');
     crate.deleteValues(root, 'test', {'@id': '#e1'});
     assert.strictEqual(root.test['@id'], '#e2');
     //check @reverse when deleting a ref
     assert.ok(!e1?.['@reverse'].test);
+    assert.ok(e2?.['@reverse'].test);
   });
 });
 
 describe("get context", function () {
   it("can return locally defined properties and classes", function () {
     const crate = new ROCrate();
-    assert.equal(crate.context?.name, "http://schema.org/name");
-    assert.equal(crate.getDefinition("name")["@id"], "http://schema.org/name");
+    assert.ok(Utils.asArray(crate.context).indexOf(defaults.context[0]) >= 0);
+    //assert.equal(crate.context?.name, "http://schema.org/name");
+    assert.equal(crate.getDefinition('name')['@id'], 'http://schema.org/name');
   });
 });
 

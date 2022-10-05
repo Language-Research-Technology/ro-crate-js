@@ -26,15 +26,14 @@ describe("Incremental checking", function () {
   it("should trigger all the right reporting", async function () {
     //json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.jsonld"));
     var crate = new ROCrate();
-    var checker = new Checker(crate);
-    var json = crate.getJson(); // should be a minimal viable datacrate
-    delete json["@context"];
-    //console.log(json);
-    assert(!checker.hasContext().status, "Does not have a @context");
+    var json = crate.toJSON(); // should be a minimal viable datacrate
+    json["@context"] = [];
+    var checker = new Checker(new ROCrate(json));
+    assert(!(await checker.hasContext()).status, "Does not have a @context");
     // Now with context
     json["@context"] = defaults.context;
     var checker = new Checker(new ROCrate(json));
-    assert(checker.hasContext(), "Has a @context");
+    assert((await checker.hasContext()).status, "Has a @context");
     // Don't have a dataset tho yet
 
     var checker = new Checker(new ROCrate(json));

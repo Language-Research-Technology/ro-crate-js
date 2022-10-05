@@ -1,3 +1,7 @@
+export type NodeRef = {
+  '@id': string
+  '@reverse': {[key: string]: any}
+}
 
 export type RawEntity = {
   '@id': string
@@ -6,7 +10,7 @@ export type RawEntity = {
 
 export type Entity = {
   '@id': string
-  '@reverse':object
+  '@reverse': {[key: string]: any}
   toJSON(): RawEntity
   [key: string]: any
 }
