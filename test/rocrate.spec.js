@@ -54,7 +54,7 @@ describe("Simple tests", function () {
 
 describe("Context", function () {
   it("can read context", async function () {
-    this.timeout(5000);
+    //this.timeout(5000);
     // No Dataset
     const crate = new ROCrate();
     crate.index();
@@ -67,7 +67,7 @@ describe("Context", function () {
   });
 
   it("can return locally defined properties and classes", async function () {
-    this.timeout(5000);
+    //this.timeout(5000);
     const j = fs.readFileSync("test_data/heurist_crate/ro-crate-metadata.json", 'utf8');
     const crate = new ROCrate(JSON.parse(j));
     crate.index();

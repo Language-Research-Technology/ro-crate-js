@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const fs = require("fs");
 const assert = require("assert").strict;
 const expect = require("chai").expect;
-const {ROCrate} = require("../lib/rocrate");
-const {Utils} = require("../lib/utils");
+const { ROCrate } = require("../lib/rocrate");
+const { Utils } = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
 
@@ -357,12 +357,12 @@ describe("deleteProperty", function () {
     let crate = new ROCrate(testData);
     let root = crate.rootDataset;
     assert.ok(root);
-    crate.addEntity({'@id': '#e1', n: 1});
-    crate.addEntity({'@id': '#e2', n: 2});
+    crate.addEntity({ '@id': '#e1', n: 1 });
+    crate.addEntity({ '@id': '#e2', n: 2 });
     var e1 = crate.getEntity('#e1');
     var e2 = crate.getEntity('#e2');
-    root.test1 = [{'@id': '#e1'}];
-    root.test2 = [{'@id': '#e2'}];
+    root.test1 = [{ '@id': '#e1' }];
+    root.test2 = [{ '@id': '#e2' }];
     assert.strictEqual(e1?.['@reverse'].test1['@id'], './');
     assert.strictEqual(e2?.['@reverse'].test2['@id'], './');
     crate.deleteProperty(root, 'test1');
@@ -374,36 +374,36 @@ describe("deleteProperty", function () {
   });
 });
 
-describe("delete values", function () {
-  var crate = new ROCrate(), root
-  beforeEach(function(){
+describe("deleteValues", function () {
+  var crate = new ROCrate(), root;
+  beforeEach(function () {
     crate = new ROCrate();
     root = crate.rootDataset;
     assert.ok(root);
   });
   it("can delete one value", function () {
-    root.test = ['a','b','c'];
+    root.test = ['a', 'b', 'c'];
     crate.deleteValues(root, 'test', 'b');
     assert.deepStrictEqual(root.test, ['a', 'c']);
   });
   it("can delete some values", function () {
-    root.test = ['a','b','c','d'];
+    root.test = ['a', 'b', 'c', 'd'];
     crate.deleteValues(root, 'test', ['b', 'c']);
     assert.deepStrictEqual(root.test, ['a', 'd']);
   });
   it("can delete all values", function () {
-    root.test = ['a','b','c'];
+    root.test = ['a', 'b', 'c'];
     crate.deleteValues(root, 'test', ['a', 'b', 'c']);
     assert.ok(!root.test);
   });
   it("can delete refs", function () {
-    crate.addEntity({'@id': '#e1', n: 1});
-    crate.addEntity({'@id': '#e2', n: 2});
+    crate.addEntity({ '@id': '#e1', n: 1 });
+    crate.addEntity({ '@id': '#e2', n: 2 });
     var e1 = crate.getEntity('#e1');
     var e2 = crate.getEntity('#e2');
-    root.test = [{'@id': '#e1'}, {'@id': '#e2'}];
+    root.test = [{ '@id': '#e1' }, { '@id': '#e2' }];
     assert.strictEqual(e1?.['@reverse'].test['@id'], './');
-    crate.deleteValues(root, 'test', {'@id': '#e1'});
+    crate.deleteValues(root, 'test', { '@id': '#e1' });
     assert.strictEqual(root.test['@id'], '#e2');
     //check @reverse when deleting a ref
     assert.ok(!e1?.['@reverse'].test);
@@ -411,12 +411,48 @@ describe("delete values", function () {
   });
 });
 
-describe("get context", function () {
+describe("getContext", function () {
   it("can return locally defined properties and classes", function () {
     const crate = new ROCrate();
     assert.ok(Utils.asArray(crate.context).indexOf(defaults.context[0]) >= 0);
     //assert.equal(crate.context?.name, "http://schema.org/name");
     assert.equal(crate.getDefinition('name')['@id'], 'http://schema.org/name');
+  });
+});
+
+describe("addContext", function () {
+  it("can add a new term to context", async function () {
+    const crate = new ROCrate();
+    await crate.resolveContext();
+    crate.addContext({ "new_term": "http://example.com/new_term" });
+    assert.equal(crate.getDefinition("new_term")['@id'], "http://example.com/new_term");
+    assert.equal(crate.resolveTerm("new_term"), "http://example.com/new_term");
+    console.log(crate.getDefinition('new_term'));
+    const newCrate = new ROCrate(crate.toJSON());
+    assert.equal(newCrate.resolveTerm("new_term"), "http://example.com/new_term");
+  });
+});
+
+describe("resolveTerm", function () {
+  const crate = new ROCrate();
+  before(async function () {
+    await crate.resolveContext();
+  });
+  it("can return already expanded term", function () {
+    assert.equal(crate.resolveTerm("http://schema.org/name"), "http://schema.org/name");
+    assert.equal(crate.resolveTerm("https://schema.org/name"), "https://schema.org/name");
+  });
+  it("can expand term", function () {
+    assert.equal(crate.resolveTerm("name"), "http://schema.org/name");
+    assert.equal(crate.resolveTerm("@vocab"), "http://schema.org/");
+  });
+  it("can expand term with prefix", function () {
+    assert.equal(crate.resolveTerm("schema:name"), "http://schema.org/name");
+    assert.equal(crate.resolveTerm("foaf:name"), "http://xmlns.com/foaf/0.1/name");
+  });
+  it("can expand simple term definition", function () {
+    crate.addContext({'FPerson': 'foaf:Person'});
+    assert.equal(crate.resolveTerm("FPerson"), "http://xmlns.com/foaf/0.1/Person");
   });
 });
 

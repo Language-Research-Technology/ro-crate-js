@@ -22,7 +22,7 @@ chai.use(require("chai-fs"));
 const defaults = require("../lib/defaults");
 const {ROCrate} = require("../lib/rocrate");
 
-describe("Incremental checking", function () {
+describe("Incremental checking", async function () {
   it("should trigger all the right reporting", async function () {
     //json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.jsonld"));
     var crate = new ROCrate();
@@ -162,8 +162,8 @@ describe("Incremental checking", function () {
       "Does have a proper contact point"
     );
 
-    checker.check();
-    console.log(checker.report());
+    await checker.check();
+    //console.log(checker.report());
   });
 });
 
