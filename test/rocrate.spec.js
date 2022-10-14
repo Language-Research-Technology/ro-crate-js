@@ -491,6 +491,28 @@ describe("IDs and identifiers", function () {
 		assert.equal(rootDataset.license, null);
 		done();
 	});
+
+  it("References to external values should not be added to the graph", function (done) {
+    const json = JSON.parse(fs.readFileSync("test_data/f2f-types-ro-crate-metadata.json"));
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const crate = new ROCrate(json, rocrateOpts);
+    assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
+    // const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
+    const rootDataset = crate.rootDataset;
+    const schemaFile = {
+      '@id': "schemaFileName",
+      '@type': ['File'], // TODO: what is this other type
+      'name': 'Frictionless Data Schema for CSV transcript files',
+      'encodingFormat': 'application/json',
+      'conformsTo': {"@id": "https://specs.frictionlessdata.io/table-schema/"}
+    }
+    crate.addValues(crate.rootDataset, 'hasPart', schemaFile);
+
+    const thisShouldBeUndefined = crate.getItem("https://specs.frictionlessdata.io/table-schema/")
+    assert.equal(thisShouldBeUndefined, undefined);
+    done();
+  });
+
 });
 
 
