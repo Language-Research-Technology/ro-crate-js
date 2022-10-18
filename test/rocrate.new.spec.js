@@ -180,7 +180,7 @@ describe("Mutators", function () {
 
 });
 
-describe("AddValues", function () {
+describe("addValues", function () {
 
   it("cannot add @id", function () {
     let crate = new ROCrate(testData);
@@ -255,7 +255,7 @@ describe("AddValues", function () {
     //console.log(crate.getGraph(true)[12]);
   });
 
-  it("generate correct @reverse nodes", function () {
+  it("can generate correct @reverse nodes", function () {
     const crate = new ROCrate(testData);
     const root = crate.rootDataset;
     const e1 = crate.getEntity("https://orcid.org/0000");
@@ -265,6 +265,21 @@ describe("AddValues", function () {
     assert.equal(e2['@reverse'].availableLanguage['@id'], "john.doe@uq.edu.au");
   });
 
+  it("does not create an entity when adding references", function () {
+    const crate = new ROCrate({alwaysAsArray: true, resolveLinks: true});
+    const root = crate.rootDataset;
+    const schemaFile = {
+      '@id': "schemaFileName",
+      '@type': ['File'],
+      'name': 'Frictionless Data Schema for CSV transcript files',
+      'encodingFormat': 'application/json',
+      'conformsTo': {"@id": "https://specs.frictionlessdata.io/table-schema/"}
+    }
+    let count = crate.graphLength;
+    crate.addValues(crate.rootDataset, 'hasPart', schemaFile);
+    assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
+    assert.equal(crate.graphLength, count + 1);
+  });
 });
 
 describe("setProperty", function () {

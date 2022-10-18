@@ -24,6 +24,7 @@ const {ROCrate} = require("../lib/rocrate");
 
 describe("Incremental checking", async function () {
   it("should trigger all the right reporting", async function () {
+    this.timeout(10000);
     //json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.jsonld"));
     var crate = new ROCrate();
     var json = crate.toJSON(); // should be a minimal viable datacrate
