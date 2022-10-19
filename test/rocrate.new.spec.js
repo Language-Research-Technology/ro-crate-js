@@ -30,7 +30,7 @@ function newCrate(graph) {
 }
 /** @type ROCrate */
 var testData = JSON.parse(fs.readFileSync('test_data/simple-test.json', 'utf8'));
-
+var crateOptions = {array: true, link: true};
 
 describe("ROCrate Create new graph", function () {
   it("can create a new empty graph using defaults", function () {
@@ -83,7 +83,18 @@ describe("addEntity", function () {
     let crate = new ROCrate();
     crate.addEntity({ '@id': 'abc' });
     let e = crate.getEntity('abc');
-    console.log(e?.toJSON());
+    assert(e);
+    assert.strictEqual(Object.keys(e.toJSON()).length, 2);
+  });
+  it("can set default @type", function () {
+    let crate = new ROCrate(crateOptions);
+    crate.addEntity({ '@id': 'test1' });
+    let e = crate.getEntity('test1');
+    assert(e);
+    assert.strictEqual(e['@type'][0], 'Thing');
+    crate.addEntity({ '@id': 'test2', '@type': 'Person' });
+    e = crate.getEntity('test2');
+    assert.strictEqual(e['@type'][0], 'Person');
   });
 });
 
