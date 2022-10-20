@@ -154,9 +154,9 @@ describe("deleteEntity", function () {
   });
   it("can delete existing entity and its references", function () {
     let crate = new ROCrate(testData);
-    crate.deleteEntity(id, {references:true});
+    crate.deleteEntity(id, { references: true });
     assert.ok(!crate.getEntity(id));
-    assert.ok(crate.rootDataset)
+    assert.ok(crate.rootDataset);
     assert.ok(!crate.rootDataset.author);
   });
 });
@@ -399,7 +399,7 @@ describe("setProperty", function () {
     assert.equal(r.test[1].d, undefined);
   });
   it("can handle nested entities", function () {
-    let crate = new ROCrate(testData, { alwaysAsArray: true, resolveLinks: true });
+    let crate = new ROCrate(testData, { array: true, link: true });
     var r = crate.rootDataset;
     assert.ok(r);
     r.test = { "@id": "https://orcid.org/0000" };
@@ -408,6 +408,10 @@ describe("setProperty", function () {
     assert.strictEqual(r.test[1].name[0], 'University of Queensland');
     r.test = [{ "@id": "https://uq.edu.au/" }];
     assert.strictEqual(r.test[0].name[0], 'University of Queensland');
+    r.hasMember = [{ "@id": "one", "@Type": "File" }, { "@id": "two", "@Type": "File" }];
+    assert.strictEqual(r.hasMember.length, 2);
+    assert.strictEqual(r.hasMember[0]['@id'], 'one');
+    assert(crate.getEntity('one'));
   });
 });
 
