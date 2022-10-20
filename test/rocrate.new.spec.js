@@ -28,9 +28,10 @@ function newCrate(graph) {
   if (!graph) { graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate]; };
   return new ROCrate({ '@context': defaults.context, '@graph': graph });
 }
-/** @type ROCrate */
-var testData = JSON.parse(fs.readFileSync('test_data/simple-test.json', 'utf8'));
-var crateOptions = {array: true, link: true};
+
+//const testData = JSON.parse(fs.readFileSync('test_data/simple-test.json', 'utf8'));
+const testData = require('../test_data/simple-test.json');
+var crateOptions = { array: true, link: true };
 
 describe("ROCrate Create new graph", function () {
   it("can create a new empty graph using defaults", function () {
@@ -53,7 +54,7 @@ describe("ROCrate Create new graph", function () {
   });
 });
 
-describe("ROCrate get entity", function () {
+describe("getEntity", function () {
   it("can get a raw entity", function () {
     let crate = new ROCrate(testData);
     let e = crate.getEntity('https://orcid.org/0000');
@@ -62,19 +63,33 @@ describe("ROCrate get entity", function () {
     assert.strictEqual(e.contactPoint['@id'], "john.doe@uq.edu.au");
     assert.strictEqual(Object.keys(e.contactPoint).length, 1);
   });
-
-  it("can get an linked entity", function () {
-    let crate = new ROCrate(testData, { resolveLinks: true });
+  it("can get a linked entity", function () {
+    let crate = new ROCrate(testData, { link: true });
     let e = crate.getEntity('https://orcid.org/0000');
     assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
     assert.strictEqual(e.contactPoint.contactType, "support");
     assert.strictEqual(e.contactPoint.availableLanguage[0].name, "English");
   });
-
-  it("can get property always as array", function () {
-    let crate = new ROCrate(testData, { resolveLinks: true, alwaysAsArray: true });
+  it("can always get property value as array", function () {
+    let crate = new ROCrate(testData, { link: true, array: true });
     let e = crate.getEntity('https://orcid.org/0000');
     assert.strictEqual(e.name[0], "John Doe");
+  });
+  it("can handle non existant id", function () {
+    let crate = new ROCrate();
+    assert(!crate.getEntity('abc'));
+    assert(!crate.getEntity(''));
+    assert(!crate.getEntity());
+    assert(!crate.getEntity(null));
+  });
+});
+
+describe("entities", function () {
+  it("can interate all entities", function () {
+    let crate = new ROCrate();
+    for (const e of crate.entities()) {
+      assert.equal(e, crate.getEntity(e['@id']));
+    }
   });
 });
 
@@ -95,6 +110,28 @@ describe("addEntity", function () {
     crate.addEntity({ '@id': 'test2', '@type': 'Person' });
     e = crate.getEntity('test2');
     assert.strictEqual(e['@type'][0], 'Person');
+  });
+});
+
+describe("deleteEntity", function () {
+  let id = 'https://orcid.org/0000';
+  it("can delete existing entity", function () {
+    let crate = new ROCrate(testData);
+    let root = crate.rootDataset;
+    let data = crate.getEntity(id)?.toJSON();
+    crate.deleteEntity(id);
+    assert.ok(!crate.getEntity(id));
+    assert.ok(root);
+    assert.equal(root.author['@id'], id);
+    crate.addEntity(data);
+    assert.equal(crate.getEntity(id)?.["@reverse"].author['@id'], root["@id"]);
+  });
+  it("can delete existing entity and its references", function () {
+    let crate = new ROCrate(testData);
+    crate.deleteEntity(id, {references:true});
+    assert.ok(!crate.getEntity(id));
+    assert.ok(crate.rootDataset)
+    assert.ok(!crate.rootDataset.author);
   });
 });
 
@@ -124,24 +161,8 @@ describe("updateEntity", function () {
     crate.updateEntity(e, true, true);
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au').contactType, 'general');
   });
-
-  //   it("can detect changes", function () {
-  //     let crate = new ROCrate();
-  //     crate.addEntity({'@id': 'abc', name: 'test'});
-  //     let u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test'});
-  //     assert.ok(u);
-  //     u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
-  //     assert.ok(u);
-  //     u = crate.updateEntity({'@id': 'abc', name: 'test', desc: 'test2'});
-  //     assert.ok(!u);
-  //     u = crate.updateEntity({'@id': 'abc', name: 'test'});
-  //     assert.ok(u);
-  //     u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
-  //     assert.ok(u);
-  //     u = crate.updateEntity({'@id': 'abc', name: 'test', tags: ['a', 'b']});
-  //     assert.ok(!u);
-  //   });
 });
+
 
 describe("Mutators", function () {
 
@@ -153,6 +174,7 @@ describe("Mutators", function () {
     assert.equal(child['@id'], "john.doe@uq.edu.au");
     assert.equal(child['@id'], parent.contactPoint['@id']);
     crate.updateEntityId(child, "jane.doe@uq.edu.au");
+    assert(!crate.getEntity('john.doe@uq.edu.au'));
     assert.equal(child['@id'], "jane.doe@uq.edu.au");
     assert.equal(child['@id'], parent.contactPoint['@id']);
   });
@@ -236,7 +258,7 @@ describe("addValues", function () {
     assert.strictEqual(e.keywords[2], "Test2");
   });
 
-  it("can add a new entity to a property (nested objects)", function () {
+  it("can recursively update an existing entity or add a new entity given nested objects", function () {
     const crate = new ROCrate(testData);
     const root = crate.rootDataset;
     const newAuthor = {
@@ -256,13 +278,19 @@ describe("addValues", function () {
       }
     };
     assert.equal(crate.graphLength, 9);
+    assert.equal(crate.getEntity("#lang-en")?.name, "English"); // existing entity
     crate.addValues(root, "author", newAuthor);
+    var pt = crate.getEntity("#pt");
+    assert(pt);
     assert.equal(crate.graphLength, 14);
-    assert.equal(crate.getEntity("#pt").name, "Petie");
-    assert.equal(crate.getEntity("#pt").affiliation[1]['@id'], "#home2");
-    assert.equal(crate.getEntity("#home").name, "home");
-    assert.equal(crate.getEntity("#home2").name, "home2");
-    assert.equal(crate.getEntity("#lang-fr").name, "French");
+    assert.equal(crate.getEntity("#lang-en")?.name, "English"); // should be unchanged
+    assert.equal(crate.getEntity("pete@uq.edu.au")?.availableLanguage[0], crate.getEntity("john.doe@uq.edu.au")?.availableLanguage[0]); //same ref object
+    assert.equal(pt.name, "Petie");
+    assert.equal(pt.affiliation[1]['@id'], "#home2");
+    assert.equal(crate.getEntity("#home")?.name, "home");
+    assert.equal(crate.getEntity("#home")?.['@type'], "Thing");
+    assert.equal(crate.getEntity("#home2")?.name, "home2");
+    assert.equal(crate.getEntity("#lang-fr")?.name, "French");
     //console.log(crate.getGraph(true)[12]);
   });
 
@@ -277,15 +305,15 @@ describe("addValues", function () {
   });
 
   it("does not create an entity when adding references", function () {
-    const crate = new ROCrate({alwaysAsArray: true, resolveLinks: true});
+    const crate = new ROCrate({ alwaysAsArray: true, resolveLinks: true });
     const root = crate.rootDataset;
     const schemaFile = {
       '@id': "schemaFileName",
       '@type': ['File'],
       'name': 'Frictionless Data Schema for CSV transcript files',
       'encodingFormat': 'application/json',
-      'conformsTo': {"@id": "https://specs.frictionlessdata.io/table-schema/"}
-    }
+      'conformsTo': { "@id": "https://specs.frictionlessdata.io/table-schema/" }
+    };
     let count = crate.graphLength;
     crate.addValues(crate.rootDataset, 'hasPart', schemaFile);
     assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
@@ -477,7 +505,7 @@ describe("resolveTerm", function () {
     assert.equal(crate.resolveTerm("foaf:name"), "http://xmlns.com/foaf/0.1/name");
   });
   it("can expand simple term definition", function () {
-    crate.addContext({'FPerson': 'foaf:Person'});
+    crate.addContext({ 'FPerson': 'foaf:Person' });
     assert.equal(crate.resolveTerm("FPerson"), "http://xmlns.com/foaf/0.1/Person");
   });
 });
@@ -541,26 +569,15 @@ author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
 }
 */
 
-// add entity with references to other entities
-	// other entity exists
-	// other entity does not exists
 
-// check for stray objects, object inserted as a property of another object
-// test nested
-// test propery as array
 // test clean up @reverse property
 
 // test get graph
 // validate jsonld in constructor
-// check deleted node
 
-// create @reverse index  ['@reverse'].name = [ parentobj1, parentobj2]
 // check for add, get, delete operations
-
-// test duplicate
 
 // check assigning an array of plain objects or entity proxy objects to a property
 // getnormalisedtree check circular
 
-// pushing value to array of property
 // get disconnected entity
