@@ -129,6 +129,8 @@ describe("Basic graph item operations", function () {
 
   });
 
+
+
   it("can't add an item with an already existing id", function () {
     const crate = newCrate(graph);
     crate.index();
@@ -513,6 +515,26 @@ describe("IDs and identifiers", function () {
     done();
   });
 
+  it("can assign items to other items", function () {
+    const crate = newCrate();  
+    crate.addValues(
+        crate.rootDataset,
+        "hasPart",
+          {
+          "@id": "one",
+          "@Type": "File"
+          });
+          crate.addValues(
+            crate.rootDataset,
+            "hasPart",
+              {
+              "@id": "two",
+              "@Type": "File"
+      });
+      crate.rootDataset.hasMember = crate.rootDataset.hasPart;
+      assert.equal( crate.rootDataset.hasMember.length, 2);
+
+    });
 });
 
 
