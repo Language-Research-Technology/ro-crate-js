@@ -44,7 +44,7 @@ describe("ROCrate Create new graph", function () {
 
   it("can create a new graph using existing jsonld", function () {
     let crate = new ROCrate(testData);
-    assert.strictEqual(crate.getGraph().length, 9);
+    assert.strictEqual(crate.graphSize, 9);
     //assert.deepStrictEqual(crate.json_ld, json);
     // test with data in which the rooId is not "./"
     var testData2 = JSON.parse(fs.readFileSync('test_data/ro-crate-metadata.json', 'utf8'));
@@ -85,13 +85,39 @@ describe("getEntity", function () {
 });
 
 describe("entities", function () {
-  it("can interate all entities", function () {
+  it("can iterate all entities", function () {
     let crate = new ROCrate();
     for (const e of crate.entities()) {
       assert.equal(e, crate.getEntity(e['@id']));
     }
+    let iter = crate.entities();
+    let e = iter.next().value;
+    assert.equal(e, crate.getEntity(e['@id']));
+    e = iter.next().value;
+    assert.equal(e, crate.getEntity(e['@id']));
   });
 });
+
+describe("getGraph", function () {
+  it("can return an array of entities", function () {
+    let crate = new ROCrate(crateOptions);
+    let graph = crate.getGraph();
+    assert.equal(graph.length, 2);
+    let e = graph.find(e => e['@id'] === 'ro-crate-metadata.json');
+    assert.equal(e.about[0]['@id'], './');
+    assert.equal(e.about[0]['@type'][0], 'Dataset');
+    e.test = 'test';
+    assert.equal(e.test[0], crate.getEntity(e['@id'])?.test[0]);
+  });
+  it("can return an array of copy of entities data", function () {
+    let crate = new ROCrate(crateOptions);
+    let graph = crate.getGraph(true);
+    let e = graph[0];
+    e.test = 'test';
+    assert(!crate.getProperty(e['@id'], 'test'));
+  });
+});
+
 
 describe("addEntity", function () {
   it("can add empty entity", function () {
@@ -277,12 +303,12 @@ describe("addValues", function () {
         ]
       }
     };
-    assert.equal(crate.graphLength, 9);
+    assert.equal(crate.graphSize, 9);
     assert.equal(crate.getEntity("#lang-en")?.name, "English"); // existing entity
     crate.addValues(root, "author", newAuthor);
     var pt = crate.getEntity("#pt");
     assert(pt);
-    assert.equal(crate.graphLength, 14);
+    assert.equal(crate.graphSize, 14);
     assert.equal(crate.getEntity("#lang-en")?.name, "English"); // should be unchanged
     assert.equal(crate.getEntity("pete@uq.edu.au")?.availableLanguage[0], crate.getEntity("john.doe@uq.edu.au")?.availableLanguage[0]); //same ref object
     assert.equal(pt.name, "Petie");
@@ -314,10 +340,10 @@ describe("addValues", function () {
       'encodingFormat': 'application/json',
       'conformsTo': { "@id": "https://specs.frictionlessdata.io/table-schema/" }
     };
-    let count = crate.graphLength;
+    let count = crate.graphSize;
     crate.addValues(crate.rootDataset, 'hasPart', schemaFile);
     assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
-    assert.equal(crate.graphLength, count + 1);
+    assert.equal(crate.graphSize, count + 1);
   });
 });
 
@@ -572,7 +598,6 @@ author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
 
 // test clean up @reverse property
 
-// test get graph
 // validate jsonld in constructor
 
 // check for add, get, delete operations
