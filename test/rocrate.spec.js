@@ -22,12 +22,15 @@ const {ROCrate} = require("../lib/rocrate");
 const {Utils} = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
-
+const {clone} = require('lodash');
 
 function newCrate(graph) {
-  if (!graph) { graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate] };
+  if (!graph) {
+    graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate]
+  }
+  ;
 
-  return new ROCrate({ '@context': defaults.context, '@graph': graph });
+  return new ROCrate({'@context': defaults.context, '@graph': graph});
 }
 
 
@@ -62,7 +65,7 @@ describe("Context", function () {
     assert.equal(crate.resolveTerm("name"), "http://schema.org/name")
     assert.equal(crate.resolveTerm("@vocab"), "http://schema.org/")
 
-    crate.addContext({ "new_term": "http://example.com/new_term" });
+    crate.addContext({"new_term": "http://example.com/new_term"});
     assert.equal(crate.resolveTerm("new_term"), "http://example.com/new_term")
   });
 
@@ -78,7 +81,7 @@ describe("Context", function () {
     crate.getJson()["@context"][1]["new_term"] = "http://example.com/new_term"
     await crate.resolveContext();
     assert.equal(crate.getDefinition("new_term")["@id"], "http://example.com/new_term")
-    crate.addItem({ "@id": "http://example.com/new_term", "sameAs": { "@id": "http://schema.org/name" } })
+    crate.addItem({"@id": "http://example.com/new_term", "sameAs": {"@id": "http://schema.org/name"}})
     assert.equal(crate.getDefinition("new_term")["@id"], "http://schema.org/name")
   });
 });
@@ -103,8 +106,8 @@ describe("Basic graph item operations", function () {
   const graph = [
     defaults.metadataFileDescriptorTemplate,
     defaults.datasetTemplate,
-    { '@id': 'https://foo/bar/oid1', 'name': 'oid1', 'description': 'Test item 1' },
-    { '@id': 'https://foo/bar/oid2', 'name': 'oid2', 'description': 'Test item 2' }
+    {'@id': 'https://foo/bar/oid1', 'name': 'oid1', 'description': 'Test item 1'},
+    {'@id': 'https://foo/bar/oid2', 'name': 'oid2', 'description': 'Test item 2'}
   ];
 
   it("can fetch items by id", function () {
@@ -151,7 +154,7 @@ describe("IDs and identifiers", function () {
     const N = 20;
     [...Array(N)].map(() => {
       const id = crate.uniqueId('_:a');
-      const success = crate.addItem({ '@id': id });
+      const success = crate.addItem({'@id': id});
       expect(success).to.be.true;
     });
 
@@ -159,81 +162,78 @@ describe("IDs and identifiers", function () {
   });
 
   it("Can resolve stuff", async function () {
-    const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
-    const crate = new ROCrate(json);
-    crate.index();
-    crate.addBackLinks();
-    const root = crate.getRootDataset();
-    const results = crate.resolve(root, [{ "property": "author" }]);
-    expect(results[0].name).to.equal("Peter Sefton");
-    const actions = crate.resolve(root, [{ "property": "author" }, { "@reverse": true, "property": "agent" }]);
-    expect(actions.length).to.equal(2);
-    expect(actions[0].name).to.equal("Took dog picture");
+      const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
+      const crate = new ROCrate(json);
+      crate.index();
+      crate.addBackLinks();
+      const root = crate.getRootDataset();
+      const results = crate.resolve(root, [{"property": "author"}]);
+      expect(results[0].name).to.equal("Peter Sefton");
+      const actions = crate.resolve(root, [{"property": "author"}, {"@reverse": true, "property": "agent"}]);
+      expect(actions.length).to.equal(2);
+      expect(actions[0].name).to.equal("Took dog picture");
 
-    const newAction = {
-      "@id": "#1",
-      "@type": "UpdateAction",
-      "agent": { '@id': 'http://orcid.org/0000-0002-3545-944X' }
+      const newAction = {
+        "@id": "#1",
+        "@type": "UpdateAction",
+        "agent": {'@id': 'http://orcid.org/0000-0002-3545-944X'}
+      }
+      crate.addItem(newAction);
+      crate.addBackLinks();
+
+      const upActions = crate.resolve(root, [
+        {"property": "author"},
+        {"@reverse": true, "property": "agent", "includes": {"@type": "UpdateAction"}}
+      ]);
+      expect(upActions.length).to.equal(1);
+
+
     }
-    crate.addItem(newAction);
-    crate.addBackLinks();
-
-    const upActions = crate.resolve(root, [
-      { "property": "author" },
-      { "@reverse": true, "property": "agent", "includes": { "@type": "UpdateAction" } }
-    ]);
-    expect(upActions.length).to.equal(1);
-
-
-  }
-
   );
 
   it("Can resolve stuff after it's turned into a graph with .toGraph()", async function () {
-    const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
-    const crate = new ROCrate(json);
-    crate.toGraph();
-    const root = crate.getRootDataset();
-    const results = crate.resolve(root, [{ "property": "author" }]);
-    expect(results[0].name[0]).to.equal("Peter Sefton");
-    const actions = crate.resolve(root, [{ "property": "author" }, { "@reverse": true, "property": "agent" }]);
-    expect(actions.length).to.equal(2);
-    expect(actions[0].name[0]).to.equal("Took dog picture");
+      const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
+      const crate = new ROCrate(json);
+      crate.toGraph();
+      const root = crate.getRootDataset();
+      const results = crate.resolve(root, [{"property": "author"}]);
+      expect(results[0].name[0]).to.equal("Peter Sefton");
+      const actions = crate.resolve(root, [{"property": "author"}, {"@reverse": true, "property": "agent"}]);
+      expect(actions.length).to.equal(2);
+      expect(actions[0].name[0]).to.equal("Took dog picture");
 
-    const newAction = {
-      "@id": "#1",
-      "@type": "UpdateAction",
-      "agent": { '@id': 'http://orcid.org/0000-0002-3545-944X' }
+      const newAction = {
+        "@id": "#1",
+        "@type": "UpdateAction",
+        "agent": {'@id': 'http://orcid.org/0000-0002-3545-944X'}
+      }
+      crate.addItem(newAction);
+      crate.addBackLinks(); // This won't do anything as we're in graph mode but leaving it in to show that nothing breaks
+      const upActions = crate.resolve(root, [
+        {"property": "author"},
+        {"@reverse": true, "property": "agent", "includes": {"@type": "UpdateAction"}}
+      ]);
+      expect(upActions.length).to.equal(1);
+
+
     }
-    crate.addItem(newAction);
-    crate.addBackLinks(); // This won't do anything as we're in graph mode but leaving it in to show that nothing breaks
-    const upActions = crate.resolve(root, [
-      { "property": "author" },
-      { "@reverse": true, "property": "agent", "includes": { "@type": "UpdateAction" } }
-    ]);
-    expect(upActions.length).to.equal(1);
-
-
-  }
-
   );
 
   it("Can create a JSON-serializable tree object (for indexing and display)", async function () {
-    const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
-    const crate = new ROCrate(json);
-    crate.toGraph();
-    const root = crate.getRootDataset();
-    const newItem = crate.getNormalizedTree(root, 2);
-    //console.log(JSON.stringify(newItem, null, 2));
-    expect(newItem.author[0].name[0]["@value"]).to.equal("Peter Sefton")
+      const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
+      const crate = new ROCrate(json);
+      crate.toGraph();
+      const root = crate.getRootDataset();
+      const newItem = crate.getNormalizedTree(root, 2);
+      //console.log(JSON.stringify(newItem, null, 2));
+      expect(newItem.author[0].name[0]["@value"]).to.equal("Peter Sefton")
 
-  }
-
+    }
   );
 
   it("Can create a JSON-serializable tree object of a non root @id = './'  (for indexing and display)", async function () {
     const json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json", 'utf8'));
-    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
     const crate = new ROCrate(json, rocrateOpts);
     const root = crate.getRootDataset();
     const newItem = crate.getNormalizedTree(root, 2);
@@ -242,16 +242,15 @@ describe("IDs and identifiers", function () {
   });
 
   it("Can create JSON-serializable tree objects from scratch (for indexing and display)", async function () {
-    const crate = new ROCrate();
-    crate.toGraph();
-    const root = crate.getRootDataset();
-    crate.pushValue(root, "name", 'This is my name')
-    const newItem = crate.getNormalizedTree(root, 1);
-    //console.log(JSON.stringify(newItem, null, 2));
-    expect(newItem.name[0]["@value"]).to.equal("This is my name")
+      const crate = new ROCrate();
+      crate.toGraph();
+      const root = crate.getRootDataset();
+      crate.pushValue(root, "name", 'This is my name')
+      const newItem = crate.getNormalizedTree(root, 1);
+      //console.log(JSON.stringify(newItem, null, 2));
+      expect(newItem.name[0]["@value"]).to.equal("This is my name")
 
-  }
-
+    }
   );
 
   it("can cope with legacy datasets", function () {
@@ -267,7 +266,7 @@ describe("IDs and identifiers", function () {
           "@type": "CreativeWork",
           "@id": roCrateMetadataID,
           "identifier": roCrateMetadataID,
-          "about": { "@id": "./" }
+          "about": {"@id": "./"}
         }
       ]
     }
@@ -354,11 +353,11 @@ describe("IDs and identifiers", function () {
     assert.equal(action.instrument[1]["@id"], "#Panny20mm")
     assert.equal(lens["@reverse"].instrument[0].name[0], action.name[0])
 
-    const newItem = { "@id": "#ABetterLens", "@type": "IndividualProduct", "name": "super lens" }
+    const newItem = {"@id": "#ABetterLens", "@type": "IndividualProduct", "name": "super lens"}
     crate.addItem(newItem);
     const getNewItemBack = crate.getItem("#ABetterLens");
 
-    const newItem1 = { "@id": "#BestLens", "@type": "IndividualProduct", "name": "bestest lens" }
+    const newItem1 = {"@id": "#BestLens", "@type": "IndividualProduct", "name": "bestest lens"}
 
     const getNewItem1Back = crate.getItem("#BestLens");
     // Did not add newItem1 to the crate
@@ -395,10 +394,8 @@ describe("IDs and identifiers", function () {
     //console.log(action.instrument);
 
 
-
-    //console.log(crate.objectified);	
+    //console.log(crate.objectified);
   });
-
 
 
   it("can find things of interest and put em in a table", async function () {
@@ -432,7 +429,6 @@ describe("IDs and identifiers", function () {
   });
 
 
-
   it("can turn a flattened graph into a nested object", async function () {
     const json = JSON.parse(fs.readFileSync("test_data/sample-ro-crate-metadata.json", 'utf8'));
     const crate = new ROCrate(json);
@@ -450,12 +446,11 @@ describe("IDs and identifiers", function () {
     crate.index();
     const root = crate.getRootDataset();
     const author = crate.getItem(root.author["@id"]);
-    author.partOf = [{ "@id": "./" }];
+    author.partOf = [{"@id": "./"}];
     const root2 = crate.objectify();
     //console.log(JSON.stringify(crate.objectified,null,2));
     assert.equal(root2.author[0].name[0], "Peter Sefton")
   });
-
 
 
   it("it can add nested objects", async function () {
@@ -463,7 +458,7 @@ describe("IDs and identifiers", function () {
     crate.toGraph();
     const root = crate.getRootDataset();
     crate.pushValue(root, "author",
-      { "@id": "#pt", "name": "Petie", "affiliation": { "@id": "#home", "name": "home" } })
+      {"@id": "#pt", "name": "Petie", "affiliation": {"@id": "#home", "name": "home"}})
     assert.equal(crate.getItem("#pt").name, "Petie");
     assert.equal(crate.getItem("#pt").affiliation[0].name, "home");
 
@@ -471,7 +466,7 @@ describe("IDs and identifiers", function () {
 
   it("Test a normal root with depth 0", function (done) {
     const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json", 'utf8'));
-    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
     const crate = new ROCrate(json, rocrateOpts);
     assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
     const root = crate.getRootDataset();
@@ -480,17 +475,17 @@ describe("IDs and identifiers", function () {
     done();
   });
 
-	it("Test nullify a property", function (done) {
-		const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json"));
-		const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
-		const crate = new ROCrate(json, rocrateOpts);
-		assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
-		// const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
-		const rootDataset = crate.rootDataset;
-		rootDataset.license = null;
-		assert.equal(rootDataset.license, null);
-		done();
-	});
+  it("Test nullify a property", function (done) {
+    const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json"));
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const crate = new ROCrate(json, rocrateOpts);
+    assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
+    // const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));
+    const rootDataset = crate.rootDataset;
+    rootDataset.license = null;
+    assert.equal(rootDataset.license, null);
+    done();
+  });
 
   it("References to external values should not be added to the graph", function (done) {
     const json = JSON.parse(fs.readFileSync("test_data/f2f-types-ro-crate-metadata.json"));
@@ -511,6 +506,28 @@ describe("IDs and identifiers", function () {
     const thisShouldBeUndefined = crate.getItem("https://specs.frictionlessdata.io/table-schema/")
     assert.equal(thisShouldBeUndefined, undefined);
     done();
+  });
+
+  it("can assign items to other items", function () {
+    const json = JSON.parse(fs.readFileSync("test_data/f2f-types-ro-crate-metadata.json"));
+    const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+    const crate = new ROCrate(json, rocrateOpts);
+
+    for (let item of crate.graph) {
+      if (item["@type"].includes("RepositoryObject")) {
+        if (item.hasFile) {
+          item.hasPart = item.hasFile;
+          assert.notEqual(item.hasPart, undefined);
+        }
+      }
+    }
+    for (let item of crate.graph) {
+      if (item["@type"].includes("RepositoryObject")) {
+        if (item.hasFile) {
+          assert.notEqual(item.hasPart, undefined);
+        }
+      }
+    }
   });
 
 });
