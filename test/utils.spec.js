@@ -19,6 +19,7 @@ const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
 const {Utils} = require("../lib/utils");
+const {ROCrate} = require("../lib/rocrate");
 
 describe("JSON-LD utils", function () {
   it("Test basic indexing", function (done) {
@@ -37,7 +38,14 @@ describe("JSON-LD utils", function () {
     o.name = 'abc';
     assert.strictEqual(cloned.name, 'test');
   });
-
+  it("Can clone entities", function () {
+    const json = JSON.parse(fs.readFileSync("test_data/f2f-ro-crate-metadata.json", 'utf8'));
+    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
+    const crate = new ROCrate(json, rocrateOpts);
+    const item = crate.getEntity('#165');
+    const clonedItem = Utils.clone(item);
+    assert.deepEqual(item, clonedItem);
+  });
 });
 
 
