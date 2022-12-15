@@ -9,6 +9,12 @@ Install the library:
 
     npm install ro-crate
 
+**Note**: The minimum Node.js version is 16.11.0.
+
+## Docs & Other Resources
+
+- [**API documentation**](https://arkisto-platform.github.io/ro-crate-js/)
+- [**ROCrate documentation and specification**](https://www.researchobject.org/ro-crate/)
 
 ## Usage
 
@@ -123,9 +129,9 @@ To save the rocrate data to a file, use `JSON.stringify`:
 // Write pretty-printed JSONLD into the directory
 fs.writeFileSync('ro-crate-metadata.json', JSON.stringify(crate, null, 2));
 ```
+For more usage examples, see the test files under the [test directory](test).
 
 For more details, refer to the full [API documentation](https://arkisto-platform.github.io/ro-crate-js/).   
-For more usage examples, see the test files under the [test directory](test).
 
 
 ## HTML Rendering
