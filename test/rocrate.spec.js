@@ -23,6 +23,7 @@ const {Utils} = require("../lib/utils");
 const defaults = require("../lib/defaults");
 const uuid = require('uuid').v4;
 
+const rocrateOpts = { array: true, link: true };
 
 function newCrate(graph) {
   if (!graph) { graph = [defaults.datasetTemplate, defaults.metadataFileDescriptorTemplate] };
@@ -233,7 +234,6 @@ describe("IDs and identifiers", function () {
 
   it("Can create a JSON-serializable tree object of a non root @id = './'  (for indexing and display)", async function () {
     const json = JSON.parse(fs.readFileSync("test_data/ro-crate-metadata.json", 'utf8'));
-    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
     const crate = new ROCrate(json, rocrateOpts);
     const root = crate.getRootDataset();
     const newItem = crate.getNormalizedTree(root, 2);
@@ -284,7 +284,8 @@ describe("IDs and identifiers", function () {
       'identifier': myId,
       "name": "local-id"
     });
-    expect(idCreated).to.not.be.false;
+    //expect(idCreated).to.not.be.false;
+    assert(idCreated);
     const idItem = crate.getItem(idCreated);
     expect(idItem).to.not.be.undefined;
     expect(idItem).to.have.property("value", myId);
@@ -311,7 +312,8 @@ describe("IDs and identifiers", function () {
       'identifier': myId,
       "name": "local-id"
     });
-    expect(idCreated).to.not.be.false;
+    //expect(idCreated).to.not.be.false;
+    assert(idCreated);
     const idItem = crate.getItem(idCreated);
     expect(idItem).to.not.be.undefined;
     expect(idItem).to.have.property("value", myId);
@@ -471,7 +473,6 @@ describe("IDs and identifiers", function () {
 
   it("Test a normal root with depth 0", function (done) {
     const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json", 'utf8'));
-    const rocrateOpts = { alwaysAsArray: true, resolveLinks: true };
     const crate = new ROCrate(json, rocrateOpts);
     assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
     const root = crate.getRootDataset();
@@ -481,8 +482,7 @@ describe("IDs and identifiers", function () {
   });
 
 	it("Test nullify a property", function (done) {
-		const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json"));
-		const rocrateOpts = {alwaysAsArray: true, resolveLinks: true};
+		const json = JSON.parse(fs.readFileSync("test_data/arcp---name,farms-to-freeways-corpus-root.json", 'utf8'));
 		const crate = new ROCrate(json, rocrateOpts);
 		assert.equal(crate.rootId, "arcp://name,farms-to-freeways/corpus/root");
 		// const rootDataset = JSON.parse(JSON.stringify(crate.rootDataset));

@@ -185,10 +185,10 @@ describe("updateEntity", function () {
         '@id': 'john.doe@uq.edu.au', contactType: 'general'
       }
     };
-    crate.updateEntity(e, true);
+    crate.updateEntity(e, {merge:true});
     assert.strictEqual(crate.getEntity('https://orcid.org/0000')?.name, 'test0');
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'support');
-    crate.updateEntity(e, true, true);
+    crate.updateEntity(e, {merge:true, recurse:true});
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'general');
   });
 });
@@ -257,14 +257,14 @@ describe("addValues", function () {
     let crate = new ROCrate(testData);
     let e = crate.getEntity('./');
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, true);
+    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, {duplicate:true});
     assert.strictEqual(e.author.length, 2);
     assert.strictEqual(e.author[0]['@id'], "https://orcid.org/0000");
     assert.strictEqual(e.author[1]['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "keywords", "Test", true);
+    crate.addValues(e, "keywords", "Test", {duplicate:true});
     assert.strictEqual(e.keywords[1], "Test");
-    crate.addValues(e, "keywords", ["Test"], true);
-    crate.addValues(e, "keywords", ["Test", "Test"], true);
+    crate.addValues(e, "keywords", ["Test"], {duplicate:true});
+    crate.addValues(e, "keywords", ["Test", "Test"], {duplicate:true});
     assert.strictEqual(e.keywords.length, 5);
     assert.strictEqual(e.keywords[2], "Test");
     assert.strictEqual(e.keywords[3], "Test");
