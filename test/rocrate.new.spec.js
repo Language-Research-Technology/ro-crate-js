@@ -336,6 +336,48 @@ describe("addValues", function () {
     assert.equal(crate.getEntity('pete@uq.edu.au')?.email, newAuthor.contactPoint.email);
   });
 
+  it("Can create a datacite citation string (or fail gracefully)", function () {
+    const crate = new ROCrate({array: true, link: true});
+    const root = crate.rootDataset;
+    citation = crate.getCitationString();
+    assert(citation.report.id && citation.report.creator && citation.report.datePublished && citation.report.publisher && citation.report.name, "Fails with several messages")
+    console.log(citation)
+    const author1 = {
+      "@id": "https://orcid.org/0000",
+      "name": "Madonna"
+       };
+    const author2 = {
+    "@id": "https://orcid.org/0001",
+    "givenName": "Albert",
+    "familyName": "Einstein"
+      };
+  
+      const publisher = {
+        "@id": "https://ror.org/00rqy9422",
+        "name": "University of Queensland"
+    };
+    const author3 = "Floki the doggo"
+    root.creator = author1;
+    root.author = [author2, author3];
+    crate.updateEntityId(root, "http://dx.doi.org/10.1093/ajae/aaq063")
+    root.datePublished = "2023-04-30";
+    root.publisher = "University of Hard Knocks";
+    root.name = "This is a very silly crate"
+    citation = crate.getCitationString();
+    assert.equal(citation.citation, 'Einstein, Albert; Floki the doggo; Madonna (2023-04-30) This is a very silly crate. University of Hard Knocks. Dataset. http://dx.doi.org/10.1093/ajae/aaq063')
+    root.publisher = {
+      "@id": "https://ror.org/00rqy9422",
+      "name": "University of Queensland"
+    }
+    citation = crate.getCitationString();
+    assert.equal(citation.citation, 'Einstein, Albert; Floki the doggo; Madonna (2023-04-30) This is a very silly crate. University of Queensland. Dataset. http://dx.doi.org/10.1093/ajae/aaq063')
+
+    console.log(citation);
+
+
+
+  });
+
   it("can handle blank node nested objects", function () {
     const crate = new ROCrate(testData, crateOptions);
     const root = crate.rootDataset;
