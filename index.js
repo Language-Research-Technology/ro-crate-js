@@ -2,9 +2,7 @@ const {ROCrate} = require('./lib/rocrate.js');
 const {Checker} = require('./lib/checker.js');
 const {Utils} = require('./lib/utils.js');
 const Defaults = require('./lib/defaults.js');
-/**
- * @exports ROCrate/RawEntity
- */
+
 module.exports = {
   ROCrate,
   Checker,

@@ -1,5 +1,5 @@
 "use strict";
-const {Node, Handler} = require("../lib/node");
+const {Node, Handler, ArrayHandler} = require("../lib/node");
 const assert = require("assert");
 const util = require('util');
 const {Utils} = require('../lib/utils');
@@ -35,8 +35,9 @@ describe("Entity wrapper", function () {
       if (e) return createEntity(e, g);
     },
     getProperty: function (entity, prop) {
+      if (prop === '@id') return entity[prop];
       let vals = Utils.asArray(entity[prop]).map(v => (v?.['@id'] && this.config.resolveLinks) ? this.getEntity(v["@id"]) || v : v);
-      return (vals.length > 1 || this.config.alwaysAsArray) ? vals : vals[0];
+      return (vals.length > 1 || this.config.alwaysAsArray) ? new Proxy(vals, new ArrayHandler(entity, prop)) : vals[0];
     },
     setProperty: function (entity, prop, value) {
       if (prop === '@id') {
@@ -158,6 +159,30 @@ describe("Entity wrapper", function () {
     assert.ok('@id' in e);
     assert.ok('name' in e);
     assert.ok(!('test' in e));
+  });
+
+  describe("Array wrapper", function () {
+    g.config.alwaysAsArray = true;
+    it("can set array value", function () {
+      let e1 = g.getEntity('#1');
+      let test = new Proxy(e1.name, { get: function(t, k, r) { console.log('p', k); return t[k]; }});
+      console.log('aaaaaaaaa');
+      test.push('a');
+      console.log('bbbbbbbbb');
+      e1.name[0] = 'test value';
+      assert.strictEqual(e1.name[0], 'test value');
+      e1.name[1] = 'name';
+      assert.strictEqual(e1.name[1], 'name');
+    });
+    it("can add to array", function () {
+      let e1 = g.getEntity('#1');
+      e1.name = ['d1'];
+      e1.name.push('name1');
+      assert.strictEqual(e1.name[1], 'name1');
+      e1.name.unshift('name0');
+      assert.strictEqual(e1.name[0], 'name0');
+    });
+  
   });
 
 });

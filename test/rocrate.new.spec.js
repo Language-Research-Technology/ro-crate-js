@@ -384,6 +384,21 @@ describe("addValues", function () {
   });
 });
 
+describe("getProperty", function () {
+  it("can update array", function () {
+    let crate = new ROCrate(testData, {array: true});
+    let root = crate.rootDataset;
+    let keywords = root.keywords;
+    assert.strictEqual(keywords[0], "Test");
+    assert.strictEqual(keywords.length, 1);
+    keywords.push('abc')
+    assert.strictEqual(root.keywords[1], "abc");
+    keywords[2] = 'def';
+    assert.strictEqual(root.keywords[2], "def");
+  });
+
+});
+
 describe("setProperty", function () {
   it("can not allow @reverse", function () {
     let crate = new ROCrate(testData);
