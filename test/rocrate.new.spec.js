@@ -100,6 +100,12 @@ describe("entities", function () {
     e = iter.next().value;
     assert.equal(e, crate.getEntity(e['@id']));
   });
+  it("can iterate filtered entities", function () {
+    let crate = new ROCrate();
+    let result = Array.from(crate.entities({filter: {'@type': /^Dataset$/}}));
+    assert.equal(result.length, 1);
+    assert.equal(result[0], crate.rootDataset);
+  });
 });
 
 describe("getGraph", function () {
@@ -464,6 +470,15 @@ describe("setProperty", function () {
     assert.strictEqual(r.hasMember.length, 2);
     assert.strictEqual(r.hasMember[0]['@id'], 'one');
     assert(crate.getEntity('one'));
+  });
+  it("can modify array of values", function () {
+    let crate = new ROCrate(testData, { array: true });
+    var r = crate.rootDataset;
+    r.license[1] = 'test licence';
+    r.license.push('test licence 2');
+    assert.strictEqual(r.license[1], 'test licence');
+    assert.strictEqual(r.license[2], 'test licence 2');
+  
   });
 });
 

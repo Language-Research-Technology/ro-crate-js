@@ -162,25 +162,33 @@ describe("Entity wrapper", function () {
   });
 
   describe("Array wrapper", function () {
-    g.config.alwaysAsArray = true;
     it("can set array value", function () {
+      g.config.alwaysAsArray = true;
       let e1 = g.getEntity('#1');
-      let test = new Proxy(e1.name, { get: function(t, k, r) { console.log('p', k); return t[k]; }});
-      console.log('aaaaaaaaa');
-      test.push('a');
-      console.log('bbbbbbbbb');
       e1.name[0] = 'test value';
       assert.strictEqual(e1.name[0], 'test value');
       e1.name[1] = 'name';
       assert.strictEqual(e1.name[1], 'name');
     });
     it("can add to array", function () {
+      g.config.alwaysAsArray = true;
       let e1 = g.getEntity('#1');
       e1.name = ['d1'];
       e1.name.push('name1');
       assert.strictEqual(e1.name[1], 'name1');
       e1.name.unshift('name0');
       assert.strictEqual(e1.name[0], 'name0');
+    });
+    it("can remove array element", function () {
+      g.config.alwaysAsArray = true;
+      let e1 = g.getEntity('#1');
+      e1.name = ['n1','n2','n3','n4', 'n5'];
+      assert.strictEqual(e1.name.pop(), 'n5');
+      assert.strictEqual(e1.name.shift(), 'n1');
+      assert.strictEqual(e1.name.length, 3);
+      e1.name.splice(1, 2);
+      assert.strictEqual(e1.name[0], 'n2');
+      assert.strictEqual(e1.name.length, 1);
     });
   
   });
