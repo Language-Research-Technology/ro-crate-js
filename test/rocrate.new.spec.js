@@ -480,6 +480,22 @@ describe("setProperty", function () {
     assert.strictEqual(r.license[2], 'test licence 2');
   
   });
+  it("can remove duplicates from the array", function () {
+    let crate = new ROCrate(testData, { array: true });
+    var r = crate.rootDataset;
+    r.license = [{ '@id': 'http://creativecommons.org/licenses/by-sa/3.0/au' }, { '@id': 'http://creativecommons.org/licenses/by-sa/3.0/au' }];
+    //console.log(r.license);
+    assert.strictEqual(r.license.length, 1);
+    //r.licence = 'test licence';
+    //r.license = [ 'test licence', 'test licence 2', 'test licence 2' ];
+    r.license = ['test licence', 'test licence 2', 'test licence'];
+    //crate.setProperty(crate.rootId, 'license', ['test licence', 'test licence 2', 'test licence']);
+    //crate.addValues(crate.rootId, "test", ['test licence', 'test licence 2', 'test licence']);
+    assert.strictEqual(r.license.length, 2);
+    r.license.push('test licence 2');
+    assert.strictEqual(r.license.length, 2);
+  
+  });
 });
 
 describe("deleteProperty", function () {
