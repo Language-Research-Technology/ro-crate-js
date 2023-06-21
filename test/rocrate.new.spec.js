@@ -86,6 +86,17 @@ describe("getEntity", function () {
     // @ts-ignore
     assert(!crate.getEntity(null));
   });
+  it("Does not kill existing entities", function() {
+    let crate = new ROCrate(testData, { link: true, replace: true });
+    let e = crate.getEntity('https://orcid.org/0000');
+    assert.ok(e);
+    assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
+    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    let auth = crate.getEntity('https://orcid.org/0000');
+    assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
+
+
+  });
 });
 
 describe("entities", function () {
