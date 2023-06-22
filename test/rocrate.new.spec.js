@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 const fs = require("fs");
 const assert = require("assert").strict;
-const expect = require("chai").expect;
+//const expect = require("chai").expect;
 const { ROCrate } = require("../lib/rocrate");
 const { Utils } = require("../lib/utils");
 const defaults = require("../lib/defaults");
@@ -388,6 +388,7 @@ describe("addValues", function () {
     assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
     assert.equal(crate.graphSize, count + 1);
   });
+  //TODO: it can add an entity already exist in the values and update the nested data
 });
 
 describe("getProperty", function () {
@@ -496,6 +497,28 @@ describe("setProperty", function () {
     assert.strictEqual(r.license.length, 2);
   
   });
+  it("can replace existing entities", function() {
+    let crate = new ROCrate(testData, { link: true, replace: true });
+    let e = crate.getEntity('https://orcid.org/0000');
+    assert.ok(e);
+    assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
+    // ref only, don't replace 
+    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    let auth = crate.getEntity('https://orcid.org/0000');
+    assert.strictEqual(auth.name, "John Doe");
+    assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
+    // replace here
+    crate.rootDataset.author = {
+      '@id': 'https://orcid.org/0000', 
+      '@type': 'Person',
+      name: 'Jane Doe'
+    };
+    auth = crate.getEntity('https://orcid.org/0000');
+    assert.ok(!auth.contactPoint);
+    assert.strictEqual(auth.name, "Jane Doe");
+
+  });
+
 });
 
 describe("deleteProperty", function () {
