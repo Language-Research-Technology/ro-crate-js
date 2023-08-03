@@ -137,6 +137,15 @@ describe("addEntity", function () {
     assert(e);
     assert.strictEqual(Object.keys(e.toJSON()).length, 2);
   });
+  it("can replace existing entity with empty entity", function () {
+    let crate = new ROCrate();
+    crate.addEntity({ '@id': 'abc', name: 'abc' });
+    let e = crate.getEntity('abc');
+    assert(e);
+    assert.strictEqual(e.name, 'abc');
+    crate.addEntity({ '@id': 'abc' }, {replace: true});
+    assert(!e.name);
+  });
   it("can set default @type", function () {
     let crate = new ROCrate(crateOptions);
     crate.addEntity({ '@id': 'test1' });
@@ -413,16 +422,22 @@ describe("setProperty", function () {
   });
   it("can accept null or undefined", function () {
     let crate = new ROCrate(testData);
-    crate.setProperty("./", "test", "test");
-    assert.strictEqual(crate.getProperty("./", "test"), "test");
     crate.setProperty("./", "test", null);
     crate.setProperty("./", "test2", undefined);
-    assert.strictEqual(crate.getProperty("./", "test"), null);
+    assert.strictEqual(crate.getProperty("./", "test"), undefined);
     assert.strictEqual(crate.getProperty("./", "test2"), undefined);
-    assert.strictEqual(crate.getEntity("./").test, null);
+    crate.setProperty("./", "test", "test");
+    crate.setProperty("./", "test2", "test2");
+    assert.strictEqual(crate.getProperty("./", "test"), "test");
+    assert.strictEqual(crate.getProperty("./", "test2"), "test2");
+    crate.setProperty("./", "test", null);
+    crate.setProperty("./", "test2", undefined);
+    assert.strictEqual(crate.getProperty("./", "test"), undefined);
+    assert.strictEqual(crate.getProperty("./", "test2"), undefined);
+    assert.strictEqual(crate.getEntity("./").test, undefined);
     assert.strictEqual(crate.getEntity("./").test2, undefined);
-    assert.strictEqual('test' in crate.getEntity("./").toJSON(), true);
-    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), true);
+    assert.strictEqual('test' in crate.getEntity("./").toJSON(), false);
+    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), false);
   });
   it("can accept empty string", function () {
     let crate = new ROCrate(testData);
