@@ -637,7 +637,13 @@ describe("addContext", function () {
     assert.equal(newCrate.resolveTerm("new_term"), "http://example.com/new_term");
   });
 });
-
+describe("getTerm", function () {
+  it("can get a term from default context", async function () {
+    const crate = new ROCrate();
+    await crate.resolveContext();
+    assert.equal(crate.getTerm('http://schema.org/Place'), "Place");
+  })  
+})
 describe("resolveTerm", function () {
   const crate = new ROCrate();
   before(async function () {
