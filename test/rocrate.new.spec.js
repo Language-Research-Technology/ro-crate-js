@@ -293,6 +293,7 @@ describe("addValues", function () {
     crate.addValues(e, "author", { "@id": "https://orcid.org/0000" });
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
     crate.addValues(e, "author", { "@id": "https://orcid.org/0001" });
+    crate.addValues(e, "author", { "@id": "https://orcid.org/0001" });
     assert.strictEqual(e.author.length, 2);
     assert.strictEqual(e.author[0]['@id'], "https://orcid.org/0000");
     assert.strictEqual(e.author[1]['@id'], "https://orcid.org/0001");
