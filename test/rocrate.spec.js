@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+
+
 const fs = require("fs");
 const assert = require("assert");
 const expect = require("chai").expect;
@@ -412,7 +415,7 @@ describe("IDs and identifiers", function () {
     //console.log(newItem.name)
 
     assert(Array.isArray(newItem.name));
-    //consol.og(crate.flatify(newItem, 2));
+    console.log(crate.flatify(newItem, 2));
     //console.log(crate.objectified);	
   });
 

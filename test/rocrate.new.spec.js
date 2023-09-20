@@ -497,6 +497,20 @@ describe("setProperty", function () {
     assert.strictEqual(r.license.length, 2);
   
   });
+
+  it("Does not kill existing entities", function() {
+    let crate = new ROCrate(testData, { link: true, replace: true });
+    let e = crate.getEntity('https://orcid.org/0000');
+    assert.ok(e);
+    assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
+    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    let auth = crate.getEntity('https://orcid.org/0000');
+    assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
+
+
+  });
+
+
   it("can replace existing entities", function() {
     let crate = new ROCrate(testData, { link: true, replace: true });
     let e = crate.getEntity('https://orcid.org/0000');
@@ -505,7 +519,7 @@ describe("setProperty", function () {
     // ref only, don't replace 
     crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
     let auth = crate.getEntity('https://orcid.org/0000');
-    assert.strictEqual(auth.name, "John Doe");
+    assert.strictEqual(auth.name, "John Doe");  
     assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
     // replace here
     crate.rootDataset.author = {
@@ -516,6 +530,14 @@ describe("setProperty", function () {
     auth = crate.getEntity('https://orcid.org/0000');
     assert.ok(!auth.contactPoint);
     assert.strictEqual(auth.name, "Jane Doe");
+
+
+
+    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    let auth1 = crate.getEntity('https://orcid.org/0000');
+    assert.strictEqual(auth1.name, "John Doe");
+    assert.strictEqual(auth1.contactPoint.email, "john.doe@uq.edu.au");
+
 
   });
 
