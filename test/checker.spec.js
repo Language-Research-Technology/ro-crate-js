@@ -15,23 +15,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-/*
-The Root Data Entity MUST have the following properties:
-
-@type: MUST be [Dataset] or an array that contain Dataset
-@id: SHOULD be the string ./ or an absolute URI (see below)
-name: SHOULD identify the dataset to humans well enough to disambiguate it from other RO-Crates
-description: SHOULD further elaborate on the name to provide a summary of the context in which the dataset is important.
-datePublished: MUST be a string in [ISO 8601 date format][DateTime] and SHOULD be specified to at least the precision of a day, MAY be a timestamp down to the millisecond.
-license: SHOULD link to a Contextual Entity or Data Entity in the RO-Crate Metadata Document with a name and description (see section on licensing). MAY, if necessary be a textual description of how the RO-Crate may be used.
-
-
-
-
-*/
-
 const assert = require("assert");
 const {Checker} = require("../lib/checker");
 const chai = require("chai");
@@ -61,52 +44,79 @@ describe("Incremental checking", async function () {
     //var dataset = crate.getRootDataset();
     var dataset = json["@graph"][0];
     dataset.name = "";
-
-
     var checker = new Checker(new ROCrate(json));
     assert(!checker.hasName().status, "Does not have a name");
     dataset.name = "Name!";
 
     var checker = new Checker(new ROCrate(json));
     assert(checker.hasName().status, "Does have a name");
+    assert(!checker.hasAuthor().status, "Does not have author");
 
-
+    // Author
+    var author1 = {
+      "@id": "http://orcid.org/some-orcid",
+      name: "Some Person",
+    };
+    dataset.author = [{ "@id": "http://orcid.org/some-orcid" }];
+    json["@graph"].push(author1);
     var checker = new Checker(new ROCrate(json));
-    assert(!checker.hasDescription().status, "Does not have a description");
-    dataset.description = "Description!";
+    assert(
+      !checker.hasAuthor().status,
+      "Does not have one or more authors with @type Person or Organization"
+    );
 
+    // One good author and one dodgy one
+    var author2 = {
+      "@id": "http://orcid.org/some-other-orcid",
+      name: "Some Person",
+      "@type": "Person",
+    };
+    dataset.author = [{ "@id": "http://orcid.org/some-orcid" }, { "@id": "http://orcid.org/some-other-orcid" }];
+    json["@graph"].push(author1, author2);
     var checker = new Checker(new ROCrate(json));
-    assert(checker.hasName().status, "Does have a description");
+    assert(
+      !checker.hasAuthor().status,
+      "Does not have one or more authors with @type Person or Organization"
+    );
+
+    // One good author
+    dataset.author = [author2];
+    json["@graph"] = [
+      defaults.metadataFileDescriptorTemplate,
+      dataset,
+      author2,
+    ];
+    var checker = new Checker(new ROCrate(json));
+    assert(
+      checker.hasAuthor().status,
+      "Does have a author with @type Person or Organization"
+    );
 
     // License
     // No name, description
-    console.log(checker.hasLicense());
     assert(
       !checker.hasLicense().status,
-      "Has a license"
+      "Does not have a license with @type CreativeWork"
     );
-
     var license = {
       "@id": "http://example.com/some_kind_of_license",
       "@type": "CreativeWork",
       URL: "http://example.com/some_kind_of_license",
     };
     dataset.license = { "@id": license["@id"] };
-
     json["@graph"].push(license);
     crate = new ROCrate(json);
     var checker = new Checker(crate);
     assert(
       checker.hasLicense().status,
-      "Has a license"
+      "Has a license with @type CreativeWork"
     );
-
     license.name = "Some license";
     license.description = "Description of at least 20 characters.";
 
     assert(
       checker.hasLicense().status,
-      "Has a license"
+      "Does have a license with @type CreativeWork and a name and description"
     );
 
     // datePublished
@@ -114,14 +124,13 @@ describe("Incremental checking", async function () {
       !checker.hasDatePublished().status,
       "Does not have a datePublished"
     );
-
-
     crate.rootDataset.datePublished = "2017"; // Not enough detail!
     assert(
-      checker.hasDatePublished().status,
+      !checker.hasDatePublished().status,
+      "Does not have a datePublished (not enough detail)"
     );
 
-    crate.rootDataset.datePublished = ["2017-07-21", "2019-08-09"]; 
+    crate.rootDataset.datePublished = ["2017-07-21", "2019-08-09"]; // this should do it
     assert(
       !checker.hasDatePublished().status,
       "Does not have a single datePublished"
@@ -130,10 +139,32 @@ describe("Incremental checking", async function () {
     crate.rootDataset.datePublished = ["2017-07-21"]; // this should do it
     assert(checker.hasDatePublished().status, "Does have a datePublished");
 
-    
+    //contactPoint missing
+    assert(
+      !checker.hasContactPoint().status,
+      "Does not have  a single contact point"
+    );
+    var contact = {
+      "@id": "some.email@example.com",
+      "@type": "ContactPoint",
+    }; // Not enough
+    dataset.contactPoint = [{ "@id": "some.email@example.com" }];
+    json["@graph"].push(contact);
+    var checker = new Checker(new ROCrate(json));
+    assert(
+      !checker.hasContactPoint().status,
+      "Does not have   a contact point with enough properties"
+    );
+    contact.contactType = "customer service";
+    contact.email = "some@email"; // TODO: Not validated!
+    var checker = new Checker(new ROCrate(json));
+    assert(
+      checker.hasContactPoint().status,
+      "Does have a proper contact point"
+    );
 
     await checker.check();
-    console.log(checker.report());
+    //console.log(checker.report());
   });
 });
 
