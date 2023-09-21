@@ -71,7 +71,6 @@ describe("Incremental checking", async function () {
     json["@context"] = [];
     var validator = new Validator(json);
     await validator.hasContext();
-    console.log(validator.result)
     assert(validator.result.errors.length === 0)
     assert(validator.result.warnings[0].message === "There is no reference to an 'official' RO-Crate @context");
 
@@ -79,8 +78,6 @@ describe("Incremental checking", async function () {
     // Now with context
     json["@context"] = defaults.context;
     var validator = new Validator(json);
-
-    discoverInParentDirExactMatch;
 
 
     // Don't have a dataset tho yet
@@ -115,6 +112,7 @@ describe("Incremental checking", async function () {
     var validator = new Validator(crate.toJSON());
     validator.rootDataEntity();
     assert(validator.result.errors.length === 4);
+
     assert(hasMessage(validator.result.errors, "Missing required property: license"))
     assert(hasMessage(validator.result.errors, "Missing required property: name"))
     assert(hasMessage(validator.result.errors, "Missing required property: description"))
