@@ -57,6 +57,7 @@ function hasMessage(results, message, id) {
 
 
 describe("Incremental checking", async function () {
+
   it("should trigger all the right reporting", async function () {
     var validator = new Validator("THIS IS NOT JSON IT IS A STRING");
     assert(validator.result.errors[0].message === `Crate is not JSON: SyntaxError: Unexpected token 'T', "THIS IS NO"... is not valid JSON`)
@@ -64,7 +65,10 @@ describe("Incremental checking", async function () {
 
     var validator = new Validator(JSON.stringify({"Something" : ["THIS IS JSON but RO-Crate will not like it one bit"]}));
     // TODO -- Actually - RO Crate does not care -- need to add some more validation :)
+    assert(hasMessage(validator.result.errors, "JSON Object not have a @graph"))
+    assert(hasMessage(validator.result.errors, "JSON object contains keys other than @graph and @context"))
 
+    assert(validator.result.errors.length === 2)
     this.timeout(10000);
     var crate = new ROCrate();
     var json = crate.toJSON(); // should be a minimal viable datacrate
