@@ -10,7 +10,9 @@
     "test-node18": "docker run -v `pwd`:`pwd` -w `pwd` node:18-alpine npm test"
   },
   "bin": {
-    "roccheck": "roc-checker.js"
+    "roccheck": "roc-checker.js",
+    "rocval": "roc-validate.js"
+
   },
   "repository": {
     "type": "git",
