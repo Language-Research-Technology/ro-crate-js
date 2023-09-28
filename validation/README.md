@@ -49,10 +49,10 @@ The fourth line shows a file which IS included as a Data Entity in the crate but
 | file | exists | inCrate |
 | ---  | ---- | --- |
 |.DS_Store | true | false |
-ohrm/web/sql|true|false
-ohrm/web/sql/EMELarc2013.sql|true|false
-objects/thumbs/tn_BAPT_001_L.jpg|true|true
-objects/thumbs/PaperCityImages/tn_PaperCity_Civic_Crook.png|false|true
+sql|true|false
+sql/XYZ.sql|true|false
+objects/thumbs/3453.jpg|true|true
+objects/thumbs/G899/56h.png|false|true
 
 
 
