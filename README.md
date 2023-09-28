@@ -15,6 +15,7 @@ Install the library:
 
 - [**API documentation**](https://arkisto-platform.github.io/ro-crate-js/)
 - [**ROCrate documentation and specification**](https://www.researchobject.org/ro-crate/)
+- [**Validate Crates**](validation) NEW!!! -- there is a new (2023-09) Validator class in development, we have a rudimentary command line interface to this -- documentation for how to include this as a library will follow soon.
 
 ## Usage
 
