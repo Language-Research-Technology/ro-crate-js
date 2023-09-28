@@ -11,9 +11,12 @@ var crateDir;
 program
   .version('0.1.0')
   .description('Runs a minimal RO-Crate validation')
-  .option('-f, --files <csv-path>', 
-      'Path to a csv file into which the tool will write a summary of which files are in the crate directory and mentioned in the crate.',
+  .option('-f, --files-path <csv-path>', 
+      'Path to a csv file into which the tool will write a summary of which files are in the crate directory and mentioned in the crate',
   )
+  .option('-r, --report-path <report-path>', 
+  'Path to a JSON file into which the tool will write a json file containing errors, warnings and info'
+)
   .arguments('<dir>')
   .action((dir) => {
     crateDir = dir;
@@ -31,7 +34,7 @@ async function main() {
   validator.parseJSON(rawJson);
   await validator.validate();
 
-  if (program.files) {
+  if (program.filesPath) {
     const files = await fs.readdir(crateDir, { recursive: true });
     // Initialise a files object which has all the files found in the crate
     const filesObj = Object.fromEntries(
@@ -45,9 +48,15 @@ async function main() {
         filesObj[key].exists
       },${filesObj[key].inCrate}\n`;
     }
-    fs.writeFile(program.files, csvString);
+    await fs.writeFile(program.filesPath, csvString);
   }
-  console.log(validator.result)
+  if (program.reportPath) {
+    
+    await fs.writeFile(program.reportPath, JSON.stringify(validator.result, null, 2));
+
+  } else {
+    //console.log(SON.stringify(validator.result, null, 2))
+  }
 }
 
 main();

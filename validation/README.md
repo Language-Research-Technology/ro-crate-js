@@ -15,17 +15,16 @@ To use validation from the command line.
 To see the usage info:
 
 ```
->> rocval --help
+ % rocval --help
 Usage: rocval [options] <dir>
 
 Runs a minimal RO-Crate validation
 
 Options:
-  -V, --version           output the version number
-  -f, --files <csv-path>  Path to a csv file into which the tool will write a summary of which files are in the crate directory and mentioned in the crate.
-  -h, --help              output usage information
-
-
+  -V, --version                    output the version number
+  -f, --files-path <csv-path>      Path to a csv file into which the tool will write a summary of which files are in the crate directory and mentioned in the crate
+  -r, --report-path <report-path>  Path to a JSON file into which the tool will write a json file containing errors, warnings and info
+  -h, --help                       output usage information
 ```
 
 To get a summary CSV of which data entites are included or not included in the RO-Crate directory, type:
