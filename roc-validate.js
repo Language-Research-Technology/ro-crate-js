@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const program = require('commander');
-const fs = require('fs/promises');
+const fs = require('fs');
 const path = require('path');
 const { ROCrate } = require('./lib/rocrate');
 const { Validator } = require('./lib/validator');
@@ -26,34 +26,36 @@ program.parse(process.argv);
 const outPath = program.outputPath ? program.outputPath : crateDir;
 
 async function main() {
-  const rawJson = await fs.readFile(
-    path.join(crateDir, 'ro-crate-metadata.json'),
-    'utf8'
+  const rawJson = fs.readFileSync(
+    path.join(crateDir, 'ro-crate-metadata.json')
   );
   const validator = new Validator();
   validator.parseJSON(rawJson);
   await validator.validate();
 
   if (program.filesPath) {
-    const files = await fs.readdir(crateDir, { recursive: true });
+    const files = fs.readdirSync(crateDir, { recursive: true });
     // Initialise a files object which has all the files found in the crate
+
+   console.log(files)
+    
     const filesObj = Object.fromEntries(
-      files.map((value) => [value, { exists: true, inCrate: false }])
+      files.map((value) => [path.join(value), { exists: true, inCrate: false, isDir: fs.lstatSync(path.join(crateDir, value)).isDirectory() }])
     );
+    console.log(filesObj);
+
     validator.checkFiles(filesObj);
 
-    var csvString = 'file,exists,inCrate\n';
+    var csvString = 'file,exists,inCrate,isDir\n';
     for (let key of Object.keys(filesObj)) {
-      csvString += `"${key.replace(/([,"])/g, '$1$1')}",${
+      csvString += `"${key.replace(/(["])/g, '$1$1')}",${
         filesObj[key].exists
-      },${filesObj[key].inCrate}\n`;
+      },${filesObj[key].inCrate},${filesObj[key].isDir}\n`;
     }
-    await fs.writeFile(program.filesPath, csvString);
+    fs.writeFileSync(program.filesPath, csvString);
   }
   if (program.reportPath) {
-    
-    await fs.writeFile(program.reportPath, JSON.stringify(validator.result, null, 2));
-
+    fs.writeFileSync(program.reportPath, JSON.stringify(validator.result, null, 2));
   } else {
     //console.log(SON.stringify(validator.result, null, 2))
   }
