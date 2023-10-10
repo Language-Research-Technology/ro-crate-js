@@ -214,6 +214,44 @@ describe('Incremental checking', async function () {
   });
 });
 
-after(function () {
-  //TODO: destroy test repoPath
+
+
+
+describe('File Validation', async function () {
+  it('should trigger all the right reporting', async function () {
+    var validator = new Validator();
+    
+    var crate = new ROCrate();
+    crate.rootDataset.hasPart = {"@id": "/some/path/to/a/file.txt", "@type": "File"}
+    
+    var validator = new Validator();
+    validator.parseJSON(crate.toJSON());
+    var result = validator.validate();
+    var files = {}; // Pretend we have no files
+    validator.checkFiles(files);
+    assert(!files["/some/path/to/a/file.txt"].exists)
+    assert(files["/some/path/to/a/file.txt"].inCrate)
+
+    // Now add a directory
+    crate.rootDataset.hasPart = {"@id": "/some/path", "@type": "Dataset"}
+    // And file that aint in it
+    crate.rootDataset.hasPart = {"@id": "/someother/path/file", "@type": "File"}
+
+    validator.parseJSON(crate.toJSON());
+    validator.checkFiles(files);
+    files["/some/path"].isDir = true;
+    files["/some/path"].exists = true;
+    validator.checkFiles(files);
+
+    assert(files["/some/path/to/a/file.txt"].dirDescribed)
+    assert(!files["/someother/path/file"].dirDescribed)
+
+
+    console.log(files);
+
+    
 });
+});
+
+
+
