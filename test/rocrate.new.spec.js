@@ -102,7 +102,7 @@ describe("entities", function () {
   });
   it("can iterate filtered entities", function () {
     let crate = new ROCrate();
-    let result = Array.from(crate.entities({filter: {'@type': /^Dataset$/}}));
+    let result = Array.from(crate.entities({ filter: { '@type': /^Dataset$/ } }));
     assert.equal(result.length, 1);
     assert.equal(result[0], crate.rootDataset);
   });
@@ -143,7 +143,7 @@ describe("addEntity", function () {
     let e = crate.getEntity('abc');
     assert(e);
     assert.strictEqual(e.name, 'abc');
-    crate.addEntity({ '@id': 'abc' }, {replace: true});
+    crate.addEntity({ '@id': 'abc' }, { replace: true });
     assert(!e.name);
   });
   it("can set default @type", function () {
@@ -200,10 +200,10 @@ describe("updateEntity", function () {
         '@id': 'john.doe@uq.edu.au', contactType: 'general'
       }
     };
-    crate.updateEntity(e, {merge:true});
+    crate.updateEntity(e, { merge: true });
     assert.strictEqual(crate.getEntity('https://orcid.org/0000')?.name, 'test0');
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'support');
-    crate.updateEntity(e, {merge:true, recurse:true});
+    crate.updateEntity(e, { merge: true, recurse: true });
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'general');
   });
 });
@@ -272,14 +272,14 @@ describe("addValues", function () {
     let crate = new ROCrate(testData);
     let e = crate.getEntity('./');
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, {duplicate:true});
+    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, { duplicate: true });
     assert.strictEqual(e.author.length, 2);
     assert.strictEqual(e.author[0]['@id'], "https://orcid.org/0000");
     assert.strictEqual(e.author[1]['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "keywords", "Test", {duplicate:true});
+    crate.addValues(e, "keywords", "Test", { duplicate: true });
     assert.strictEqual(e.keywords[1], "Test");
-    crate.addValues(e, "keywords", ["Test"], {duplicate:true});
-    crate.addValues(e, "keywords", ["Test", "Test"], {duplicate:true});
+    crate.addValues(e, "keywords", ["Test"], { duplicate: true });
+    crate.addValues(e, "keywords", ["Test", "Test"], { duplicate: true });
     assert.strictEqual(e.keywords.length, 5);
     assert.strictEqual(e.keywords[2], "Test");
     assert.strictEqual(e.keywords[3], "Test");
@@ -344,7 +344,7 @@ describe("addValues", function () {
     var author2 = {
       '@id': '#john',
       name: 'john',
-      contactPoint: {'@id': 'pete@uq.edu.au'}
+      contactPoint: { '@id': 'pete@uq.edu.au' }
     };
     crate.addValues(root, 'author', author2);
     assert.equal(crate.getEntity('pete@uq.edu.au')?.email, newAuthor.contactPoint.email);
@@ -398,12 +398,32 @@ describe("addValues", function () {
     assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
     assert.equal(crate.graphSize, count + 1);
   });
+  it("can handle circular references in the input", function () {
+    const crate = new ROCrate(testData, {link: true, array: true});
+    const root = crate.rootDataset.toJSON();
+    const file = {
+      "@id": "BCNT_anon/elan/Bcnt_AEF_032_Camila.eaf",
+      "speaker": "Camila",
+      "@type": [
+        "File",
+        "Annotation"
+      ],
+      "partOf": root,
+      "annotationOf": {
+        "@id": "Bcnt_AEF_032_Camila.wav"
+      },
+      "encodingFormat": []
+    };
+    root.hasPart = [file];
+    crate.addValues('./', 'hasPart', file);
+  });
+
   //TODO: it can add an entity already exist in the values and update the nested data
 });
 
 describe("getProperty", function () {
   it("can update array", function () {
-    let crate = new ROCrate(testData, {array: true});
+    let crate = new ROCrate(testData, { array: true });
     let root = crate.rootDataset;
     let keywords = root.keywords;
     assert.strictEqual(keywords[0], "Test");
@@ -495,7 +515,7 @@ describe("setProperty", function () {
     r.license.push('test licence 2');
     assert.strictEqual(r.license[1], 'test licence');
     assert.strictEqual(r.license[2], 'test licence 2');
-  
+
   });
   it("can remove duplicates from the array", function () {
     let crate = new ROCrate(testData, { array: true });
@@ -511,21 +531,21 @@ describe("setProperty", function () {
     assert.strictEqual(r.license.length, 2);
     r.license.push('test licence 2');
     assert.strictEqual(r.license.length, 2);
-  
+
   });
-  it("can replace existing entities", function() {
+  it("can replace existing entities", function () {
     let crate = new ROCrate(testData, { link: true, replace: true });
     let e = crate.getEntity('https://orcid.org/0000');
     assert.ok(e);
     assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
     // ref only, don't replace 
-    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    crate.rootDataset.author = { '@id': 'https://orcid.org/0000' }
     let auth = crate.getEntity('https://orcid.org/0000');
     assert.strictEqual(auth.name, "John Doe");
     assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
     // replace here
     crate.rootDataset.author = {
-      '@id': 'https://orcid.org/0000', 
+      '@id': 'https://orcid.org/0000',
       '@type': 'Person',
       name: 'Jane Doe'
     };
@@ -643,7 +663,7 @@ describe("getTerm", function () {
     const crate = new ROCrate();
     await crate.resolveContext();
     assert.equal(crate.getTerm('http://schema.org/Place'), "Place");
-  })  
+  })
 })
 describe("resolveTerm", function () {
   const crate = new ROCrate();
