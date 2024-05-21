@@ -687,7 +687,15 @@ describe("addTermDefinition", function () {
     assert.ok(!crate.getDefinition('Geometry'));
     crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
     assert.ok(crate.getDefinition('Geometry'));
-
+  });
+  it("can add a new term to new context", async function () {
+    const crate = new ROCrate({'@context': 'http://example.com/test'}, {array: true});
+    //await crate.resolveContext();
+    assert.ok(!crate.getDefinition('Geometry'));
+    crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.equal(crate.getDefinition('Geometry')['@id'], 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.equal(crate.getTerm('http://www.opengis.net/ont/geosparql#Geometry'), 'Geometry');
+    assert.equal(crate.context.length, 2);
   });
 });
 describe("getTerm", function () {
