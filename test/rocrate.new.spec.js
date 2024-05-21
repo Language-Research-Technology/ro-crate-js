@@ -54,6 +54,16 @@ describe("ROCrate Create new graph", function () {
   });
 });
 
+describe("hasEntity", function () {
+  it("can find existing entity", function () {
+    let crate = new ROCrate(testData);
+    let e = crate.hasEntity('https://orcid.org/0000');
+    assert.ok(e);
+    e = crate.hasEntity('https://orcid.org/non-existant');
+    assert.ok(!e);
+  });
+});
+
 describe("getEntity", function () {
   it("can get a raw entity", function () {
     let crate = new ROCrate(testData);
@@ -640,6 +650,7 @@ describe("deleteValues", function () {
 describe("getContext", function () {
   it("can return locally defined properties and classes", function () {
     const crate = new ROCrate();
+    console.log(crate.context);
     assert.ok(Utils.asArray(crate.context).indexOf(defaults.context[0]) >= 0);
     //assert.equal(crate.context?.name, "http://schema.org/name");
     assert.equal(crate.getDefinition('name')?.['@id'], 'http://schema.org/name');
@@ -653,9 +664,30 @@ describe("addContext", function () {
     crate.addContext({ "new_term": "http://example.com/new_term" });
     assert.equal(crate.getDefinition("new_term")?.['@id'], "http://example.com/new_term");
     assert.equal(crate.resolveTerm("new_term"), "http://example.com/new_term");
-    console.log(crate.getDefinition('new_term'));
+    //console.log(crate.getDefinition('new_term'));
     const newCrate = new ROCrate(crate.toJSON());
     assert.equal(newCrate.resolveTerm("new_term"), "http://example.com/new_term");
+  });
+  it('can add URL entry to context', function(){
+    const crate = new ROCrate({array: true});
+    let l = crate.context.length;
+    crate.addContext('http://example.com/context');
+    let c = crate.context;
+    assert.equal(c.length, l + 1);
+    assert.equal(c.pop(), 'http://example.com/context');
+    l = crate.context.length;
+    crate.addContext('http://example.com/context');
+    assert.equal(crate.context.length, l);
+  });
+});
+describe("addTermDefinition", function () {
+  it("can add a new term to existing context", async function () {
+    const crate = new ROCrate({array: true});
+    await crate.resolveContext();
+    assert.ok(!crate.getDefinition('Geometry'));
+    crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.ok(crate.getDefinition('Geometry'));
+
   });
 });
 describe("getTerm", function () {
