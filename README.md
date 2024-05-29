@@ -13,7 +13,7 @@ Install the library:
 
 ## Docs & Other Resources
 
-- [**API documentation**](https://arkisto-platform.github.io/ro-crate-js/)
+- [**API documentation**](https://language-research-technology.github.io/ro-crate-js/)
 - [**ROCrate documentation and specification**](https://www.researchobject.org/ro-crate/)
 
 ## Usage
