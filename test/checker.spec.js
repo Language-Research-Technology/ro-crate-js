@@ -166,6 +166,19 @@ describe("Incremental checking", async function () {
     await checker.check();
     //console.log(checker.report());
   });
+  it("should check for invalid context", async function () {
+    this.timeout(10000);
+    var crate = new ROCrate({'@context': []});
+    var checker = new Checker(crate);
+    assert(!(await checker.hasContext()).status, "Does not have a @context");
+    // Now with context
+    crate = new ROCrate();
+    var checker = new Checker(crate);
+    assert((await checker.hasContext()).status, "Has a @context");
+    // check for invalid context
+    crate.addContext('https://w3id.org/ldac/profile');
+    assert(!(await (new Checker(crate)).hasContext()).status, "Has invalid url in @context");
+  });
 });
 
 after(function () {

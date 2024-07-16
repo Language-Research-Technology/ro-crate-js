@@ -705,6 +705,25 @@ describe("getTerm", function () {
     assert.equal(crate.getTerm('http://schema.org/Place'), "Place");
   })
 })
+
+describe("resolveContext", function () {
+  it("can resolve correct context", async function () {
+    const crate = new ROCrate();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], undefined);
+    crate.addContext('https://w3id.org/ldac/context');
+    await crate.resolveContext();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], 'https://w3id.org/ldac/terms#DataLicense');
+  });
+
+  it("can ignore bad context", async function () {
+    const crate = new ROCrate();
+    crate.addContext('https://w3id.org/ldac/context');
+    crate.addContext('https://w3id.org/ldac/profile');
+    await crate.resolveContext();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], 'https://w3id.org/ldac/terms#DataLicense');
+  });
+});
+
 describe("resolveTerm", function () {
   const crate = new ROCrate();
   before(async function () {
