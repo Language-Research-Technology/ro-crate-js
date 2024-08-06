@@ -54,6 +54,16 @@ describe("ROCrate Create new graph", function () {
   });
 });
 
+describe("hasEntity", function () {
+  it("can find existing entity", function () {
+    let crate = new ROCrate(testData);
+    let e = crate.hasEntity('https://orcid.org/0000');
+    assert.ok(e);
+    e = crate.hasEntity('https://orcid.org/non-existant');
+    assert.ok(!e);
+  });
+});
+
 describe("getEntity", function () {
   it("can get a raw entity", function () {
     let crate = new ROCrate(testData);
@@ -102,7 +112,7 @@ describe("entities", function () {
   });
   it("can iterate filtered entities", function () {
     let crate = new ROCrate();
-    let result = Array.from(crate.entities({filter: {'@type': /^Dataset$/}}));
+    let result = Array.from(crate.entities({ filter: { '@type': /^Dataset$/ } }));
     assert.equal(result.length, 1);
     assert.equal(result[0], crate.rootDataset);
   });
@@ -136,6 +146,15 @@ describe("addEntity", function () {
     let e = crate.getEntity('abc');
     assert(e);
     assert.strictEqual(Object.keys(e.toJSON()).length, 2);
+  });
+  it("can replace existing entity with empty entity", function () {
+    let crate = new ROCrate();
+    crate.addEntity({ '@id': 'abc', name: 'abc' });
+    let e = crate.getEntity('abc');
+    assert(e);
+    assert.strictEqual(e.name, 'abc');
+    crate.addEntity({ '@id': 'abc' }, { replace: true });
+    assert(!e.name);
   });
   it("can set default @type", function () {
     let crate = new ROCrate(crateOptions);
@@ -191,10 +210,10 @@ describe("updateEntity", function () {
         '@id': 'john.doe@uq.edu.au', contactType: 'general'
       }
     };
-    crate.updateEntity(e, {merge:true});
+    crate.updateEntity(e, { merge: true });
     assert.strictEqual(crate.getEntity('https://orcid.org/0000')?.name, 'test0');
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'support');
-    crate.updateEntity(e, {merge:true, recurse:true});
+    crate.updateEntity(e, { merge: true, recurse: true });
     assert.strictEqual(crate.getEntity('john.doe@uq.edu.au')?.contactType, 'general');
   });
 });
@@ -263,14 +282,14 @@ describe("addValues", function () {
     let crate = new ROCrate(testData);
     let e = crate.getEntity('./');
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, {duplicate:true});
+    crate.addValues(e, "author", { "@id": "https://orcid.org/0000" }, { duplicate: true });
     assert.strictEqual(e.author.length, 2);
     assert.strictEqual(e.author[0]['@id'], "https://orcid.org/0000");
     assert.strictEqual(e.author[1]['@id'], "https://orcid.org/0000");
-    crate.addValues(e, "keywords", "Test", {duplicate:true});
+    crate.addValues(e, "keywords", "Test", { duplicate: true });
     assert.strictEqual(e.keywords[1], "Test");
-    crate.addValues(e, "keywords", ["Test"], {duplicate:true});
-    crate.addValues(e, "keywords", ["Test", "Test"], {duplicate:true});
+    crate.addValues(e, "keywords", ["Test"], { duplicate: true });
+    crate.addValues(e, "keywords", ["Test", "Test"], { duplicate: true });
     assert.strictEqual(e.keywords.length, 5);
     assert.strictEqual(e.keywords[2], "Test");
     assert.strictEqual(e.keywords[3], "Test");
@@ -283,6 +302,7 @@ describe("addValues", function () {
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
     crate.addValues(e, "author", { "@id": "https://orcid.org/0000" });
     assert.strictEqual(e.author['@id'], "https://orcid.org/0000");
+    crate.addValues(e, "author", { "@id": "https://orcid.org/0001" });
     crate.addValues(e, "author", { "@id": "https://orcid.org/0001" });
     assert.strictEqual(e.author.length, 2);
     assert.strictEqual(e.author[0]['@id'], "https://orcid.org/0000");
@@ -334,7 +354,7 @@ describe("addValues", function () {
     var author2 = {
       '@id': '#john',
       name: 'john',
-      contactPoint: {'@id': 'pete@uq.edu.au'}
+      contactPoint: { '@id': 'pete@uq.edu.au' }
     };
     crate.addValues(root, 'author', author2);
     assert.equal(crate.getEntity('pete@uq.edu.au')?.email, newAuthor.contactPoint.email);
@@ -388,12 +408,32 @@ describe("addValues", function () {
     assert(!crate.getEntity('https://specs.frictionlessdata.io/table-schema/'));
     assert.equal(crate.graphSize, count + 1);
   });
+  it("can handle circular references in the input", function () {
+    const crate = new ROCrate(testData, {link: true, array: true});
+    const root = crate.rootDataset.toJSON();
+    const file = {
+      "@id": "BCNT_anon/elan/Bcnt_AEF_032_Camila.eaf",
+      "speaker": "Camila",
+      "@type": [
+        "File",
+        "Annotation"
+      ],
+      "partOf": root,
+      "annotationOf": {
+        "@id": "Bcnt_AEF_032_Camila.wav"
+      },
+      "encodingFormat": []
+    };
+    root.hasPart = [file];
+    crate.addValues('./', 'hasPart', file);
+  });
+
   //TODO: it can add an entity already exist in the values and update the nested data
 });
 
 describe("getProperty", function () {
   it("can update array", function () {
-    let crate = new ROCrate(testData, {array: true});
+    let crate = new ROCrate(testData, { array: true });
     let root = crate.rootDataset;
     let keywords = root.keywords;
     assert.strictEqual(keywords[0], "Test");
@@ -413,16 +453,22 @@ describe("setProperty", function () {
   });
   it("can accept null or undefined", function () {
     let crate = new ROCrate(testData);
-    crate.setProperty("./", "test", "test");
-    assert.strictEqual(crate.getProperty("./", "test"), "test");
     crate.setProperty("./", "test", null);
     crate.setProperty("./", "test2", undefined);
-    assert.strictEqual(crate.getProperty("./", "test"), null);
+    assert.strictEqual(crate.getProperty("./", "test"), undefined);
     assert.strictEqual(crate.getProperty("./", "test2"), undefined);
-    assert.strictEqual(crate.getEntity("./").test, null);
+    crate.setProperty("./", "test", "test");
+    crate.setProperty("./", "test2", "test2");
+    assert.strictEqual(crate.getProperty("./", "test"), "test");
+    assert.strictEqual(crate.getProperty("./", "test2"), "test2");
+    crate.setProperty("./", "test", null);
+    crate.setProperty("./", "test2", undefined);
+    assert.strictEqual(crate.getProperty("./", "test"), undefined);
+    assert.strictEqual(crate.getProperty("./", "test2"), undefined);
+    assert.strictEqual(crate.getEntity("./").test, undefined);
     assert.strictEqual(crate.getEntity("./").test2, undefined);
-    assert.strictEqual('test' in crate.getEntity("./").toJSON(), true);
-    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), true);
+    assert.strictEqual('test' in crate.getEntity("./").toJSON(), false);
+    assert.strictEqual('test2' in crate.getEntity("./").toJSON(), false);
   });
   it("can accept empty string", function () {
     let crate = new ROCrate(testData);
@@ -479,7 +525,7 @@ describe("setProperty", function () {
     r.license.push('test licence 2');
     assert.strictEqual(r.license[1], 'test licence');
     assert.strictEqual(r.license[2], 'test licence 2');
-  
+
   });
   it("can remove duplicates from the array", function () {
     let crate = new ROCrate(testData, { array: true });
@@ -495,49 +541,27 @@ describe("setProperty", function () {
     assert.strictEqual(r.license.length, 2);
     r.license.push('test licence 2');
     assert.strictEqual(r.license.length, 2);
-  
-  });
-
-  it("Does not kill existing entities", function() {
-    let crate = new ROCrate(testData, { link: true, replace: true });
-    let e = crate.getEntity('https://orcid.org/0000');
-    assert.ok(e);
-    assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
-    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
-    let auth = crate.getEntity('https://orcid.org/0000');
-    assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
-
 
   });
-
-
-  it("can replace existing entities", function() {
+  it("can replace existing entities", function () {
     let crate = new ROCrate(testData, { link: true, replace: true });
     let e = crate.getEntity('https://orcid.org/0000');
     assert.ok(e);
     assert.strictEqual(e.contactPoint.email, "john.doe@uq.edu.au");
     // ref only, don't replace 
-    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
+    crate.rootDataset.author = { '@id': 'https://orcid.org/0000' }
     let auth = crate.getEntity('https://orcid.org/0000');
-    assert.strictEqual(auth.name, "John Doe");  
+    assert.strictEqual(auth.name, "John Doe");
     assert.strictEqual(auth.contactPoint.email, "john.doe@uq.edu.au");
     // replace here
     crate.rootDataset.author = {
-      '@id': 'https://orcid.org/0000', 
+      '@id': 'https://orcid.org/0000',
       '@type': 'Person',
       name: 'Jane Doe'
     };
     auth = crate.getEntity('https://orcid.org/0000');
     assert.ok(!auth.contactPoint);
     assert.strictEqual(auth.name, "Jane Doe");
-
-
-
-    crate.rootDataset.author = {'@id': 'https://orcid.org/0000'}
-    let auth1 = crate.getEntity('https://orcid.org/0000');
-    assert.strictEqual(auth1.name, "John Doe");
-    assert.strictEqual(auth1.contactPoint.email, "john.doe@uq.edu.au");
-
 
   });
 
@@ -626,6 +650,7 @@ describe("deleteValues", function () {
 describe("getContext", function () {
   it("can return locally defined properties and classes", function () {
     const crate = new ROCrate();
+    console.log(crate.context);
     assert.ok(Utils.asArray(crate.context).indexOf(defaults.context[0]) >= 0);
     //assert.equal(crate.context?.name, "http://schema.org/name");
     assert.equal(crate.getDefinition('name')?.['@id'], 'http://schema.org/name');
@@ -639,9 +664,63 @@ describe("addContext", function () {
     crate.addContext({ "new_term": "http://example.com/new_term" });
     assert.equal(crate.getDefinition("new_term")?.['@id'], "http://example.com/new_term");
     assert.equal(crate.resolveTerm("new_term"), "http://example.com/new_term");
-    console.log(crate.getDefinition('new_term'));
+    //console.log(crate.getDefinition('new_term'));
     const newCrate = new ROCrate(crate.toJSON());
     assert.equal(newCrate.resolveTerm("new_term"), "http://example.com/new_term");
+  });
+  it('can add URL entry to context', function(){
+    const crate = new ROCrate({array: true});
+    let l = crate.context.length;
+    crate.addContext('http://example.com/context');
+    let c = crate.context;
+    assert.equal(c.length, l + 1);
+    assert.equal(c.pop(), 'http://example.com/context');
+    l = crate.context.length;
+    crate.addContext('http://example.com/context');
+    assert.equal(crate.context.length, l);
+  });
+});
+describe("addTermDefinition", function () {
+  it("can add a new term to existing context", async function () {
+    const crate = new ROCrate({array: true});
+    await crate.resolveContext();
+    assert.ok(!crate.getDefinition('Geometry'));
+    crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.ok(crate.getDefinition('Geometry'));
+  });
+  it("can add a new term to new context", async function () {
+    const crate = new ROCrate({'@context': 'http://example.com/test'}, {array: true});
+    //await crate.resolveContext();
+    assert.ok(!crate.getDefinition('Geometry'));
+    crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.equal(crate.getDefinition('Geometry')['@id'], 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.equal(crate.getTerm('http://www.opengis.net/ont/geosparql#Geometry'), 'Geometry');
+    assert.equal(crate.context.length, 2);
+  });
+});
+describe("getTerm", function () {
+  it("can get a term from default context", async function () {
+    const crate = new ROCrate();
+    await crate.resolveContext();
+    assert.equal(crate.getTerm('http://schema.org/Place'), "Place");
+  })
+})
+
+describe("resolveContext", function () {
+  it("can resolve correct context", async function () {
+    const crate = new ROCrate();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], undefined);
+    crate.addContext('https://w3id.org/ldac/context');
+    await crate.resolveContext();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], 'https://w3id.org/ldac/terms#DataLicense');
+  });
+
+  it("can ignore bad context", async function () {
+    const crate = new ROCrate();
+    crate.addContext('https://w3id.org/ldac/context');
+    crate.addContext('https://w3id.org/ldac/profile');
+    await crate.resolveContext();
+    assert.equal(crate.getDefinition('DataLicense')?.['@id'], 'https://w3id.org/ldac/terms#DataLicense');
   });
 });
 

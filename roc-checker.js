@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 
-const program = require('commander');
+const { Command } = require('commander');
 const fs = require('fs/promises');
 const path = require('path');
 const {ROCrate} = require("./lib/rocrate");
 const {Checker} = require("./lib/checker");
 
 var crateDir;
-
+const program = new Command();
 program
   .version("0.1.0")
   .description(

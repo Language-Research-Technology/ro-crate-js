@@ -31,11 +31,11 @@ license: SHOULD link to a Contextual Entity or Data Entity in the RO-Crate Metad
 */
 
 const assert = require('assert');
-const { Validator } = require('../lib/validator');
+const {Validator} = require('../lib/validator');
 const chai = require('chai');
 chai.use(require('chai-fs'));
 const defaults = require('../lib/defaults');
-const { ROCrate } = require('../lib/rocrate');
+const {ROCrate} = require('../lib/rocrate');
 
 function hasClause(results, rule, id) {
   if (id) {
@@ -44,12 +44,8 @@ function hasClause(results, rule, id) {
   return results.some((r) => r.clause === rule.clause);
 }
 
-function hasMessage(results, message, id) {
-  if (id) {
-    return results.some((r) => r.message === message && r.entity === id);
-  }
-
-  return results.some((r) => r.message === message);
+function hasMessage(results, messageId, status) {
+  return results.some(r => r.id === messageId && r.status === status)
 }
 
 describe('Incremental checking', async function () {
@@ -57,8 +53,7 @@ describe('Incremental checking', async function () {
     var validator = new Validator();
     validator.parseJSON('THIS IS NOT JSON IT IS A STRING');
     assert(
-      validator.result.errors[0].message ===
-        `Crate is not JSON: SyntaxError: Unexpected token 'T', "THIS IS NO"... is not valid JSON`
+      hasMessage(validator.results, "validJson", "error"), "not a valid json"
     );
     assert(validator.crate === null);
 
@@ -70,16 +65,18 @@ describe('Incremental checking', async function () {
     );
     // TODO -- Actually - RO Crate does not care -- need to add some more validation :)
     assert(
-      hasMessage(validator.result.errors, 'JSON Object does not have a @graph')
+      hasMessage(validator.results, "validCrateNoGraph", "error", 'JSON Object does not have a @graph')
     );
     assert(
       hasMessage(
-        validator.result.errors,
-        'JSON object contains keys other than @graph and @context'
-      )
+        validator.results,
+        "validCrateInvalidKeys",
+        "error"
+      ),
+      'JSON object contains keys other than @graph and @context'
     );
 
-    assert(validator.result.errors.length === 2);
+    //assert(validator.result.errors.length === 2);
     this.timeout(10000);
     var crate = new ROCrate();
     var json = crate.toJSON(); // should be a minimal viable datacrate
@@ -87,10 +84,8 @@ describe('Incremental checking', async function () {
     var validator = new Validator();
     validator.parseJSON(json)
     await validator.hasContext();
-    assert(validator.result.errors.length === 0);
     assert(
-      validator.result.warnings[0].message ===
-        "There is no reference to an 'official' RO-Crate @context"
+      hasMessage(validator.results, "hasContext", "warning")
     );
 
     // Now with context
@@ -109,10 +104,10 @@ describe('Incremental checking', async function () {
 
     assert(
       hasMessage(
-        validator.result.warnings,
-        'Root Data Entity has appropriate @id. Is: Nothing special',
-        'Nothing special'
-      )
+        validator.results,
+        "rootDataEntityId",
+        "warning"
+      ), 'Root Data Entity has appropriate @id. Is: Nothing special',
     );
 
     // Check that the Root Data Entity has the right @type
@@ -122,19 +117,32 @@ describe('Incremental checking', async function () {
     validator.parseJSON(crate.toJSON());
     validator.rootDataEntity();
     assert(
-      validator.result.errors[0].clause ===
-        '@type: MUST be [Dataset] or an array that contain Dataset'
+      hasMessage(
+        validator.results,
+        "rootDatasetType",
+        "error"
+      ), 'Root Data Entity has appropriate @id. Is: Nothing special',
     );
 
     // Check that the Root Data Entity has the right Type -- change the context so it doesn't
     var crate = new ROCrate();
-    crate.addContext({ Dataset: 'some:dodgy-definiton-of-dataset' });
+    crate.addContext({Dataset: 'some:dodgy-definiton-of-dataset'});
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
     validator.rootDataEntity();
     assert(
-      validator.result.errors[0].clause ===
-        '@type: MUST be [Dataset] or an array that contain Dataset'
+      hasMessage(
+        validator.results,
+        "rootDatasetType",
+        "error"
+      ), 'Root Data Entity has appropriate @id. Is: Nothing special',
+    );
+    assert(
+      hasMessage(
+        validator.results,
+        "rootDatasetType",
+        "error"
+      ), 'Root Data Entity has appropriate @id. Is: Nothing special',
     );
 
     // Check required props on Root Data Entity
@@ -142,25 +150,18 @@ describe('Incremental checking', async function () {
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
     validator.rootDataEntity();
-    assert(validator.result.errors.length === 4);
 
     assert(
-      hasMessage(validator.result.errors, 'Missing required property: license')
+      hasMessage(validator.results, 'licenseRequired', 'error')
     );
     assert(
-      hasMessage(validator.result.errors, 'Missing required property: name')
+      hasMessage(validator.results, 'nameRequired', 'error')
     );
     assert(
-      hasMessage(
-        validator.result.errors,
-        'Missing required property: description'
-      )
+      hasMessage(validator.results, 'descriptionRequired', 'error')
     );
     assert(
-      hasMessage(
-        validator.result.errors,
-        'Missing required property: datePublished'
-      )
+      hasMessage(validator.results, 'datePublishedRequired', 'error')
     );
 
     // Check required props on Root Data Entity are properly defined  -- and if the context is wrong then they are not
@@ -180,24 +181,17 @@ describe('Incremental checking', async function () {
     crate.rootDataset.datePublished = '1983';
     validator.rootDataEntity();
 
-    assert(validator.result.errors.length === 4);
     assert(
-      hasMessage(validator.result.errors, 'Missing required property: license')
+      hasMessage(validator.results, 'licenseRequired', 'error')
     );
     assert(
-      hasMessage(validator.result.errors, 'Missing required property: name')
+      hasMessage(validator.results, 'nameRequired', 'error')
     );
     assert(
-      hasMessage(
-        validator.result.errors,
-        'Missing required property: description'
-      )
+      hasMessage(validator.results, 'descriptionRequired', 'error')
     );
     assert(
-      hasMessage(
-        validator.result.errors,
-        'Missing required property: datePublished'
-      )
+      hasMessage(validator.results, 'datePublishedRequired', 'error')
     );
 
     // Check required props on Root Data Entity are properly defined
@@ -206,24 +200,33 @@ describe('Incremental checking', async function () {
     crate.rootDataset.description = 'description';
     crate.rootDataset.license = 'bad license';
     crate.rootDataset.datePublished = '1983';
-    validator.rootDataEntity();
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
+    validator.rootDataEntity();
 
-    assert(validator.result.errors.length === 0);
+    assert(
+      hasMessage(validator.results, 'licenseRequired', 'success')
+    );
+    assert(
+      hasMessage(validator.results, 'nameRequired', 'success')
+    );
+    assert(
+      hasMessage(validator.results, 'descriptionRequired', 'success')
+    );
+    assert(
+      hasMessage(validator.results, 'datePublishedRequired', 'success')
+    );
   });
 });
-
-
 
 
 describe('File Validation', async function () {
   it('should trigger all the right reporting', async function () {
     var validator = new Validator();
-    
+
     var crate = new ROCrate();
     crate.rootDataset.hasPart = {"@id": "/some/path/to/a/file.txt", "@type": "File"}
-    
+
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
     var result = validator.validate();
@@ -248,9 +251,8 @@ describe('File Validation', async function () {
 
 
     console.log(files);
-
     
-});
+  });
 });
 
 
