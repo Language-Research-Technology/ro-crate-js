@@ -1,6 +1,6 @@
 {
   "name": "ro-crate",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,6 @@
     "metadata",
     "jsonld"
   ],
-  "author": "UTS eResearch Team",
   "contributors": [
     "Alvin Sebastian (https://orcid.org/0000-0002-9086-1722)",
     "Moises Sacal Bonequi (https://orcid.org/0000-0002-4438-2755)",

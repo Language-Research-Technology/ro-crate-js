@@ -796,6 +796,61 @@ describe("toJSON", function () {
   });
 });
 
+describe("compactProperties", function () {
+  it("can compact multiple properties", function () {
+    let crate = new ROCrate(testData, { link: true, array: true });
+    let root = crate.rootDataset;
+    root['https://w3id.org/ldac/terms#test'] = 'test';
+    root['https://w3id.org/ldac/terms#test2'] = 'test2';
+    assert.equal(root['https://w3id.org/ldac/terms#test'][0], 'test');
+    assert.equal(root['https://w3id.org/ldac/terms#test2'][0], 'test2');
+    crate.compactProperties({ldac: "https://w3id.org/ldac/terms#"});
+    assert.equal(root['ldac:test'][0], 'test');
+    assert.equal(root['ldac:test2'][0], 'test2');
+    assert(!root['https://w3id.org/ldac/terms#test']);
+  });
+  it("should not compact wrong iri", function () {
+    let crate = new ROCrate(testData, { link: true, array: true });
+    let root = crate.rootDataset;
+    root['https://w3id.org/ldac/terms#test'] = 'test';
+    root['https://w3id.org/ldac/termstest'] = 'test';
+    crate.compactProperties({ldac: "https://w3id.org/ldac/terms"});
+    assert.equal(root['https://w3id.org/ldac/terms#test'][0], 'test');
+    assert.equal(root['https://w3id.org/ldac/termstest'][0], 'test');
+    assert(!root['ldac:test']);
+  })
+  it("can support multiple prefixes", function () {
+    let crate = new ROCrate(testData, { link: true, array: true });
+    let root = crate.rootDataset;
+    root['https://w3id.org/ldac/terms#test'] = 'test';
+    root['http://purl.org/pav/test'] = 'test2';
+    assert.equal(root['https://w3id.org/ldac/terms#test'][0], 'test');
+    assert.equal(root['http://purl.org/pav/test'][0], 'test2');
+    crate.compactProperties({ 
+      ldac: "https://w3id.org/ldac/terms#",
+      pav: "http://purl.org/pav/",
+    });
+    assert.equal(root['ldac:test'][0], 'test');
+    assert.equal(root['pav:test'][0], 'test2');
+    assert(!root['https://w3id.org/ldac/terms#test']);
+    assert(!root['http://purl.org/pav/test']);
+  });
+  it("can compact multiple entities", function () {
+    let crate = new ROCrate(testData, { link: true, array: true });
+    let root = crate.rootDataset;
+    let author = crate.rootDataset.author[0];
+    root['https://w3id.org/ldac/terms#test'] = 'test';
+    author['https://w3id.org/ldac/terms#test'] = 'test';
+    assert.equal(root['https://w3id.org/ldac/terms#test'][0], 'test');
+    assert.equal(author['https://w3id.org/ldac/terms#test'][0], 'test');
+    crate.compactProperties({ldac: "https://w3id.org/ldac/terms#"});
+    assert.equal(root['ldac:test'][0], 'test');
+    assert.equal(author['ldac:test'][0], 'test');
+    assert(!author['https://w3id.org/ldac/terms#test']);
+  });
+
+});
+
 /*
 {
 author: [{@id: 1, @reverse:{author:[{@id:0}]}},{@id: 2, @reverse:{author:[]}}]
