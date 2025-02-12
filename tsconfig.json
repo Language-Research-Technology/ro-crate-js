@@ -17,6 +17,7 @@
     "out": "./docs",
     "excludePrivate": true,
     "excludeProtected": true,
-    "includeVersion": true
+    "includeVersion": true,
+    "skipErrorChecking": true
   }
 }
