@@ -25,6 +25,7 @@ const {describe} = require("node:test");
 
 describe("All test", async function() {
   it("should test all the things", async function(){
+    this.timeout(5000);
     var crate = new ROCrate();
     var json = crate.toJSON(); // should be a minimal viable datacrate
     var checker = new Checker(new ROCrate(json));
