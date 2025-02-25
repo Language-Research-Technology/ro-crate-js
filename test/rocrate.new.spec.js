@@ -854,7 +854,9 @@ describe("compactProperties", function () {
     await crate.resolveContext();
     let root = crate.rootDataset;
     crate.addTermDefinition('doi', ldacTerm + 'doi');
+    crate.addTermDefinition('testt', ldacTerm + 'test');
     root['doi'] = 'test';
+    root['testt'] = 'test';
     // assert(!crate.resolveTerm('ldac')) // first ensure ldac term is not defined in context
     // crate.compactProperties({ldac: ldacTerm}); // this should do nothing
     // assert.equal(root['doi'][0], 'test');
@@ -864,6 +866,22 @@ describe("compactProperties", function () {
     crate.compactProperties({ldac: ldacTerm});
     //crate.addContext({"doi": "https://w3id.org/ldac/terms#doi"});
     assert.equal(root['ldac:doi'][0], 'test');
+    assert.equal(root['doi'], undefined);
+    assert.equal(root['ldac:test'][0], 'test');
+    assert.equal(root['testt'], undefined);
+  });
+  it("can work with existing prefixes", async function () {
+    let ldacTerm = "https://w3id.org/ldac/terms#";
+    let crate = new ROCrate(testData, { link: true, array: true });
+    await crate.resolveContext();
+    let root = crate.rootDataset;
+    crate.addTermDefinition('ldac', ldacTerm);
+    crate.addTermDefinition('doi', ldacTerm + 'doi');
+    root['ldac:doi'] = 'test';
+    root['ldac:test'] = 'test';
+    crate.compactProperties({ldac: ldacTerm});
+    assert.equal(root['ldac:doi'][0], 'test');
+    assert.equal(root['ldac:test'][0], 'test');
     assert.equal(root['doi'], undefined);
   });
 
