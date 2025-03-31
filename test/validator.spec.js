@@ -31,7 +31,7 @@ license: SHOULD link to a Contextual Entity or Data Entity in the RO-Crate Metad
 */
 
 const assert = require('assert');
-const {Validator} = require('../lib/validator');
+const {Validator, validate} = require('../lib/validator');
 const chai = require('chai');
 chai.use(require('chai-fs'));
 const defaults = require('../lib/defaults');
@@ -217,15 +217,29 @@ describe('Incremental checking', async function () {
       hasMessage(validator.results, 'datePublishedRequired', 'success')
     );
   });
+  v
 });
 
 
 describe('File Validation', async function () {
+  it('check for file references', async function () {
+    const crate = new ROCrate({array: true});
+    //Add a reference to a non-existent entity
+    crate.rootDataset.hasPart = [{"@id": "/some/path/to/a/file.txt"}];
+
+    var files = {};
+    const results = await validate(crate, files);
+    assert(results.length > 0);
+    assert(results.find(result =>
+      result.id === 'validCrateDataEntityPath' && result.status === 'error'
+    ) !== -1, 'error recorded in validCrateDataEntityPath array');
+  });
+
   it('should trigger all the right reporting', async function () {
     var validator = new Validator();
 
-    var crate = new ROCrate();
-    crate.rootDataset.hasPart = {"@id": "/some/path/to/a/file.txt", "@type": "File"}
+    var crate = new ROCrate({array: true});
+    crate.rootDataset.hasPart = [{"@id": "/some/path/to/a/file.txt", "@type": "File"}];
 
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
@@ -236,9 +250,9 @@ describe('File Validation', async function () {
     assert(files["/some/path/to/a/file.txt"].inCrate)
 
     // Now add a directory
-    crate.rootDataset.hasPart = {"@id": "/some/path", "@type": "Dataset"}
+    crate.rootDataset.hasPart = [{"@id": "/some/path", "@type": "Dataset"}];
     // And file that aint in it
-    crate.rootDataset.hasPart = {"@id": "/someother/path/file", "@type": "File"}
+    crate.rootDataset.hasPart = [{"@id": "/someother/path/file", "@type": "File"}];
 
     validator.parseJSON(crate.toJSON());
     validator.checkFiles(files);
@@ -249,8 +263,13 @@ describe('File Validation', async function () {
     assert(files["/some/path/to/a/file.txt"].dirDescribed)
     assert(!files["/someother/path/file"].dirDescribed)
 
-
-    console.log(files);
+    let errors = 0;
+    for (let result of validator.results) {
+      if (result.id === 'validCrateDataEntityPath' && result.status === 'error') {
+        errors++;
+      }
+    }
+    assert(errors === 3);
 
   });
 });
