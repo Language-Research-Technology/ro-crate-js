@@ -24,10 +24,6 @@ name: SHOULD identify the dataset to humans well enough to disambiguate it from 
 description: SHOULD further elaborate on the name to provide a summary of the context in which the dataset is important.
 datePublished: MUST be a string in [ISO 8601 date format][DateTime] and SHOULD be specified to at least the precision of a day, MAY be a timestamp down to the millisecond.
 license: SHOULD link to a Contextual Entity or Data Entity in the RO-Crate Metadata Document with a name and description (see section on licensing). MAY, if necessary be a textual description of how the RO-Crate may be used.
-
-
-
-
 */
 
 const assert = require('assert');
@@ -48,7 +44,7 @@ function hasMessage(results, messageId, status) {
   return results.some(r => r.id === messageId && r.status === status)
 }
 
-describe('Incremental checking', async function () {
+describe('Incremental checking', function () {
   it('should trigger all the right reporting', async function () {
     var validator = new Validator();
     validator.parseJSON('THIS IS NOT JSON IT IS A STRING');
@@ -217,11 +213,11 @@ describe('Incremental checking', async function () {
       hasMessage(validator.results, 'datePublishedRequired', 'success')
     );
   });
-  v
+  
 });
 
 
-describe('File Validation', async function () {
+describe('File Validation', function () {
   it('check for file references', async function () {
     const crate = new ROCrate({array: true});
     //Add a reference to a non-existent entity
