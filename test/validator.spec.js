@@ -24,14 +24,10 @@ name: SHOULD identify the dataset to humans well enough to disambiguate it from 
 description: SHOULD further elaborate on the name to provide a summary of the context in which the dataset is important.
 datePublished: MUST be a string in [ISO 8601 date format][DateTime] and SHOULD be specified to at least the precision of a day, MAY be a timestamp down to the millisecond.
 license: SHOULD link to a Contextual Entity or Data Entity in the RO-Crate Metadata Document with a name and description (see section on licensing). MAY, if necessary be a textual description of how the RO-Crate may be used.
-
-
-
-
 */
 
 const assert = require('assert');
-const {Validator} = require('../lib/validator');
+const {Validator, validate} = require('../lib/validator');
 const chai = require('chai');
 chai.use(require('chai-fs'));
 const defaults = require('../lib/defaults');
@@ -48,7 +44,7 @@ function hasMessage(results, messageId, status) {
   return results.some(r => r.id === messageId && r.status === status)
 }
 
-describe('Incremental checking', async function () {
+describe('Incremental checking', function () {
   it('should trigger all the right reporting', async function () {
     var validator = new Validator();
     validator.parseJSON('THIS IS NOT JSON IT IS A STRING');
@@ -217,15 +213,29 @@ describe('Incremental checking', async function () {
       hasMessage(validator.results, 'datePublishedRequired', 'success')
     );
   });
+  
 });
 
 
-describe('File Validation', async function () {
+describe('File Validation', function () {
+  it('check for file references', async function () {
+    const crate = new ROCrate({array: true});
+    //Add a reference to a non-existent entity
+    crate.rootDataset.hasPart = [{"@id": "/some/path/to/a/file.txt"}];
+
+    var files = {};
+    const results = await validate(crate, files);
+    assert(results.length > 0);
+    assert(results.find(result =>
+      result.id === 'validCrateDataEntityPath' && result.status === 'error'
+    ) !== -1, 'error recorded in validCrateDataEntityPath array');
+  });
+
   it('should trigger all the right reporting', async function () {
     var validator = new Validator();
 
-    var crate = new ROCrate();
-    crate.rootDataset.hasPart = {"@id": "/some/path/to/a/file.txt", "@type": "File"}
+    var crate = new ROCrate({array: true});
+    crate.rootDataset.hasPart = [{"@id": "/some/path/to/a/file.txt", "@type": "File"}];
 
     var validator = new Validator();
     validator.parseJSON(crate.toJSON());
@@ -236,9 +246,9 @@ describe('File Validation', async function () {
     assert(files["/some/path/to/a/file.txt"].inCrate)
 
     // Now add a directory
-    crate.rootDataset.hasPart = {"@id": "/some/path", "@type": "Dataset"}
+    crate.rootDataset.hasPart = [{"@id": "/some/path", "@type": "Dataset"}];
     // And file that aint in it
-    crate.rootDataset.hasPart = {"@id": "/someother/path/file", "@type": "File"}
+    crate.rootDataset.hasPart = [{"@id": "/someother/path/file", "@type": "File"}];
 
     validator.parseJSON(crate.toJSON());
     validator.checkFiles(files);
@@ -249,8 +259,13 @@ describe('File Validation', async function () {
     assert(files["/some/path/to/a/file.txt"].dirDescribed)
     assert(!files["/someother/path/file"].dirDescribed)
 
-
-    console.log(files);
+    let errors = 0;
+    for (let result of validator.results) {
+      if (result.id === 'validCrateDataEntityPath' && result.status === 'error') {
+        errors++;
+      }
+    }
+    assert(errors === 3);
 
   });
 });
