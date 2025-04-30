@@ -443,6 +443,19 @@ describe("getProperty", function () {
     keywords[2] = 'def';
     assert.strictEqual(root.keywords[2], "def");
   });
+  it("must keep original value as is when array config is false", function () {
+    let crate = new ROCrate(testData, { array: false });
+    let root = crate.rootDataset;
+    crate.setProperty(root, 'testprop1', 'test');
+    root.testprop2 = 'test';
+    assert.strictEqual(crate.getProperty(root, 'testprop1'), 'test');
+    assert.strictEqual(root.testprop2, 'test');
+
+    crate.setProperty(root, 'testprop1', ['test']);
+    root.testprop2 = ['test'];
+    assert.strictEqual(crate.getProperty(root, 'testprop1')[0], 'test');
+    assert.strictEqual(root.testprop2[0], 'test');
+  });
 
 });
 
