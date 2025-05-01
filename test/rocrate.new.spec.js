@@ -729,6 +729,7 @@ describe("resolveContext", function () {
   });
 
   it("can ignore bad context", async function () {
+    this.timeout(5000);
     const crate = new ROCrate();
     crate.addContext('https://w3id.org/ldac/context');
     crate.addContext('https://w3id.org/ldac/profile');
@@ -757,6 +758,16 @@ describe("resolveTerm", function () {
   it("can expand simple term definition", function () {
     crate.addContext({ 'FPerson': 'foaf:Person' });
     assert.equal(crate.resolveTerm("FPerson"), "http://xmlns.com/foaf/0.1/Person");
+  });
+  it("can return non-http IRI", function () {
+    crate.addContext({ 
+      'cooee': 'arcp://name,corpus-of-oz-early-english/terms#',
+      'class': 'arcp://name,corpus-of-oz-early-english/terms/class',
+      'arrivalDate': '#arrivalDate',
+     });
+    assert.equal(crate.resolveTerm('class'), 'arcp://name,corpus-of-oz-early-english/terms/class');
+    assert.equal(crate.resolveTerm('cooee:textType'), 'arcp://name,corpus-of-oz-early-english/terms#textType');
+    assert.equal(crate.resolveTerm('arrivalDate'), '#arrivalDate');
   });
 });
 
