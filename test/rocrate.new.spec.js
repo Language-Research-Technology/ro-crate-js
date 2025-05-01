@@ -443,6 +443,19 @@ describe("getProperty", function () {
     keywords[2] = 'def';
     assert.strictEqual(root.keywords[2], "def");
   });
+  it("must keep original value as is when array config is false", function () {
+    let crate = new ROCrate(testData, { array: false });
+    let root = crate.rootDataset;
+    crate.setProperty(root, 'testprop1', 'test');
+    root.testprop2 = 'test';
+    assert.strictEqual(crate.getProperty(root, 'testprop1'), 'test');
+    assert.strictEqual(root.testprop2, 'test');
+
+    crate.setProperty(root, 'testprop1', ['test']);
+    root.testprop2 = ['test'];
+    assert.strictEqual(crate.getProperty(root, 'testprop1')[0], 'test');
+    assert.strictEqual(root.testprop2[0], 'test');
+  });
 
 });
 
@@ -716,6 +729,7 @@ describe("resolveContext", function () {
   });
 
   it("can ignore bad context", async function () {
+    this.timeout(5000);
     const crate = new ROCrate();
     crate.addContext('https://w3id.org/ldac/context');
     crate.addContext('https://w3id.org/ldac/profile');
@@ -744,6 +758,16 @@ describe("resolveTerm", function () {
   it("can expand simple term definition", function () {
     crate.addContext({ 'FPerson': 'foaf:Person' });
     assert.equal(crate.resolveTerm("FPerson"), "http://xmlns.com/foaf/0.1/Person");
+  });
+  it("can return non-http IRI", function () {
+    crate.addContext({ 
+      'cooee': 'arcp://name,corpus-of-oz-early-english/terms#',
+      'class': 'arcp://name,corpus-of-oz-early-english/terms/class',
+      'arrivalDate': '#arrivalDate',
+     });
+    assert.equal(crate.resolveTerm('class'), 'arcp://name,corpus-of-oz-early-english/terms/class');
+    assert.equal(crate.resolveTerm('cooee:textType'), 'arcp://name,corpus-of-oz-early-english/terms#textType');
+    assert.equal(crate.resolveTerm('arrivalDate'), '#arrivalDate');
   });
 });
 
