@@ -265,7 +265,7 @@ describe('File Validation', function () {
         errors++;
       }
     }
-    assert(errors === 3);
+    assert.strictEqual(errors, 3);
 
   });
 });
