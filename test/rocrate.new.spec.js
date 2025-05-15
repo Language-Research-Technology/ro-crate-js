@@ -733,6 +733,7 @@ describe("resolveContext", function () {
     const crate = new ROCrate();
     crate.addContext('https://w3id.org/ldac/context');
     crate.addContext('https://w3id.org/ldac/profile');
+    crate.addContext('test');
     await crate.resolveContext();
     assert.equal(crate.getDefinition('DataLicense')?.['@id'], 'https://w3id.org/ldac/terms#DataLicense');
   });
