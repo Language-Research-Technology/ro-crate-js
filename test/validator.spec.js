@@ -268,6 +268,13 @@ describe('File Validation', function () {
     assert.strictEqual(errors, 3);
 
   });
+
+  it('should allow empty hasPart', async function () {
+    var crate = new ROCrate({array: true});
+    const files = {};
+    const results = await validate(crate, files);
+    assert.strictEqual(Object.keys(files).length, 0);
+  });
 });
 
 
