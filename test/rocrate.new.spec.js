@@ -236,6 +236,21 @@ describe("Mutators", function () {
     assert.equal(child['@id'], parent.contactPoint['@id']);
   });
 
+  it("prevent rename @id to an existing one", function () {
+    let crate = new ROCrate(testData);
+    const parent = crate.getEntity("https://orcid.org/0000");
+    crate.addValues(parent, "contactPoint", { "@id": "john@uq.edu.au", "@type": "ContactPoint", email: "john@uq.edu.au" });
+    const child1 = crate.getEntity("john.doe@uq.edu.au");
+    const child2 = crate.getEntity("john@uq.edu.au");
+    assert.ok(parent);
+    assert.ok(child1);
+    assert.ok(child2);
+    const r = crate.updateEntityId(child2, "john.doe@uq.edu.au");
+    assert(!r);
+    assert.equal(crate.getEntity("john.doe@uq.edu.au").email, child1.email);
+    assert.equal(crate.getEntity("john@uq.edu.au").email, child2.email);
+  });
+
   it("can rename root ID", function () {
     let crate = new ROCrate(testData);
     //let crate = new ROCrate(testData, { resolveLinks: true, alwaysAsArray: true });
