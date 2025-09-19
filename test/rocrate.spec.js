@@ -50,7 +50,7 @@ describe("Simple tests", function () {
     crate.index();
     const rootDataset = crate.getRootDataset();
     assert(Utils.hasType(rootDataset, "Dataset"));
-    assert.equal(crate.utils.asArray(crate.getJson()["@context"])[0], "https://w3id.org/ro/crate/1.1/context", "Has standard context (defined in ./lib/defaults.js)")
+    assert.equal(crate.utils.asArray(crate.getJson()["@context"])[0], defaults.roCrateContextUrl, "Has standard context (defined in ./lib/context.json)")
 
     done();
   });

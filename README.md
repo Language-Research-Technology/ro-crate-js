@@ -9,7 +9,7 @@ Install the library:
 
     npm install ro-crate
 
-**Note**: The minimum Node.js version is 16.11.0.
+**Note**: The minimum Node.js version is 20.
 
 ## Docs & Other Resources
 

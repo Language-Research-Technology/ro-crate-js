@@ -1,9 +1,10 @@
 {
   "name": "ro-crate",
-  "version": "3.5.1",
+  "version": "3.6.0",
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
   "scripts": {
+    "postinstall": "node update-context.mjs",
     "test": "mocha",
     "build-docs": "typedoc",
     "test-node16": "docker run -v `pwd`:`pwd` -w `pwd` node:16-alpine npm test",
@@ -13,7 +14,6 @@
   "bin": {
     "roccheck": "roc-checker.js",
     "rocval": "roc-validate.js"
-
   },
   "repository": {
     "type": "git",
@@ -38,14 +38,14 @@
     "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.1",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.13.1",
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "chai-fs": "^2.0.0",
     "lodash": "^4.17.21",
-    "mocha": "^10.7.0",
-    "typedoc": "^0.27.7",
+    "mocha": "^11.7.2",
+    "typedoc": "^0.28.13",
     "uuid": "^8.3.2"
   },
   "files": [

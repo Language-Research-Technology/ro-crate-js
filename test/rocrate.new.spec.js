@@ -37,7 +37,7 @@ describe("ROCrate Create new graph", function () {
   it("can create a new empty graph using defaults", function () {
     let crate = new ROCrate();
     let raw = crate.toJSON();
-    assert.ok(Utils.asArray(raw['@context']).includes('https://w3id.org/ro/crate/1.1/context'));
+    assert.ok(Utils.asArray(raw['@context']).includes(defaults.roCrateContextUrl));
     //assert.strictEqual(raw["@graph"]);
     //assert.deepStrictEqual(crate.json_ld['@graph'], [defaults.datasetTemplate,defaults.metadataFileDescriptorTemplate]);
   });
@@ -712,8 +712,8 @@ describe("addTermDefinition", function () {
   it("can add a new term to existing context", async function () {
     const crate = new ROCrate({array: true});
     await crate.resolveContext();
-    assert.ok(!crate.getDefinition('Geometry'));
-    crate.addTermDefinition('Geometry', 'http://www.opengis.net/ont/geosparql#Geometry');
+    assert.ok(!crate.getDefinition('NewTerm'));
+    crate.addTermDefinition('Geometry', 'http://www.test.com/terms#NewTerm');
     assert.ok(crate.getDefinition('Geometry'));
   });
   it("can add a new term to new context", async function () {
