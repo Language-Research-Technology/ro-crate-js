@@ -402,7 +402,7 @@ describe("addValues", function () {
     const crate = new ROCrate(testData);
     const root = crate.rootDataset;
     const e1 = crate.getEntity("https://orcid.org/0000");
-    console.log(e1['@reverse']);
+    //console.log(e1['@reverse']);
     assert.equal(e1['@reverse'].author['@id'], "./");
     const e2 = crate.getEntity("#lang-es");
     assert.equal(e2['@reverse'].availableLanguage['@id'], "john.doe@uq.edu.au");
@@ -678,7 +678,7 @@ describe("deleteValues", function () {
 describe("getContext", function () {
   it("can return locally defined properties and classes", function () {
     const crate = new ROCrate();
-    console.log(crate.context);
+    //console.log(crate.context);
     assert.ok(Utils.asArray(crate.context).indexOf(defaults.context[0]) >= 0);
     //assert.equal(crate.context?.name, "http://schema.org/name");
     assert.equal(crate.getDefinition('name')?.['@id'], 'http://schema.org/name');

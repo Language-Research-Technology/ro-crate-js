@@ -415,7 +415,7 @@ describe("IDs and identifiers", function () {
     //console.log(newItem.name)
 
     assert(Array.isArray(newItem.name));
-    console.log(crate.flatify(newItem, 2));
+    //console.log(crate.flatify(newItem, 2));
     //console.log(crate.objectified);	
   });
 
