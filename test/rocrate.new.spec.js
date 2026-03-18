@@ -166,6 +166,16 @@ describe("addEntity", function () {
     e = crate.getEntity('test2');
     assert.strictEqual(e?.['@type'][0], 'Person');
   });
+  it("ignore if @id property is not a string", function () {
+    const crate = new ROCrate(testData);
+    const entityId = { name: 'test1'};
+    const count = crate.graphSize;
+    crate.addEntity({ '@id': entityId });
+    const e = crate.getEntity(entityId);
+    assert.strictEqual(crate.graphSize, count);
+    assert.ok(!e);
+  });
+
 });
 
 describe("deleteEntity", function () {
@@ -283,6 +293,13 @@ describe("Mutators", function () {
     assert.ok(crate.getEntity(entityId));
   });
 
+  it("ensure that @id must be a string", function () {
+    const crate = new ROCrate(testData);
+    const entityId = 'https://orcid.org/0000';
+    const e = crate.getEntity(entityId);
+    e['@id'] = { name: 'test' };
+    assert.ok(crate.getEntity(entityId));
+  });
 });
 
 describe("addValues", function () {
