@@ -3,9 +3,11 @@
   "version": "3.7.0",
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "mocha",
     "build-docs": "typedoc",
+    "build": "tsc",
     "test-node16": "docker run -v `pwd`:`pwd` -w `pwd` node:16-alpine npm test",
     "test-node20": "docker run -v `pwd`:`pwd` -w `pwd` node:20-alpine npm test",
     "test-node21": "docker run -v `pwd`:`pwd` -w `pwd` node:21-alpine npm test"
@@ -51,7 +53,8 @@
     "index.js",
     "index.mjs",
     "roc-checker.js",
-    "lib"
+    "lib",
+    "dist"
   ],
   "engines": {
     "node": ">=20"
