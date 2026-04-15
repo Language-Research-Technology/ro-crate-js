@@ -5,12 +5,14 @@
     "baseUrl": "..",
     "module": "CommonJS",
     "target": "es2022",
+    "declaration": true,
     "outDir": "dist",
+    "resolveJsonModule": true
   },
   "include": [
     "index.ts",
     "lib/**/*.js",
-    "lib/**/*.d.ts"
+    "lib/**/*.ts"
   ],
   "typedocOptions": {
     "entryPoints": ["index.ts"],
