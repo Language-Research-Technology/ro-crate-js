@@ -1,6 +1,6 @@
 {
   "name": "ro-crate",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "Research Object Crate (RO-Crate) utilities for making and consuming crates",
   "main": "index.js",
   "types": "dist/index.d.ts",
@@ -45,8 +45,8 @@
     "chai": "^4.3.6",
     "chai-fs": "^2.0.0",
     "lodash": "^4.17.21",
-    "mocha": "^11.7.2",
-    "typedoc": "^0.28.13",
+    "mocha": "^11.7.5",
+    "typedoc": "0.28.13",
     "uuid": "^8.3.2"
   },
   "files": [

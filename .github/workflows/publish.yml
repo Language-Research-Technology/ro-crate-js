@@ -7,19 +7,22 @@ on:
     types: [completed]
     branches: [master, main]
 
+permissions: write-all
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
       - uses: ButlerLogic/action-autotag@1.1.2
-        with:
+        env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
           tag_prefix: "v"
         id: create_tag
       # - run: echo ${{ steps.create_tag.outputs.tagname }}
