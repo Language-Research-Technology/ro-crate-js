@@ -46,8 +46,9 @@
     "chai-fs": "^2.0.0",
     "lodash": "^4.17.21",
     "mocha": "^11.7.5",
-    "typedoc": "0.28.13",
-    "uuid": "^8.3.2"
+    "typedoc": "^0.28.19",
+    "uuid": "^8.3.2",
+    "typescript": "^6.0.2"
   },
   "files": [
     "index.js",
