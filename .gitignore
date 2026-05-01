@@ -66,3 +66,6 @@ typings/
 
 # generated api documentation
 docs/
+
+# generated types
+dist/
